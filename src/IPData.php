@@ -62,6 +62,30 @@ class IPData
             if(!is_readable(__DIR__ . '/data/geo-ip/IpToCountry.6R.csv')) {
                 throw new Exception('File IpToCountry.6R.csv exists but is unreadable.');
             }
+            require_once __DIR__ . '/BigFileIterator.php';
+            $largefile = new BigFileIterator(__DIR__ . '/data/geo-ip/IpToCountry.6R.csv');
+            $iterator = $largefile->iterate("Text");
+
+            $count = 0;
+            foreach ($iterator as $line) {
+                if($count>327) {
+                    $informations = str_getcsv($line, ',', '"');
+                    $ips = explode('-', $informations[0]);
+                    $startingIP = inet_pton($ips[0]);
+                    $endingIp = inet_pton($ips[1]);
+                    $currentIP = inet_pton($this->_currentVisitor->getIpVisitor());
+                    if ( (strlen($currentIP) == strlen($startingIP)) &&  ($currentIP >= $startingIP && $currentIP <= $endingIp)) {
+                        require_once __DIR__ . '/CountryCodes.php';
+                        $country = new CountryCodes();
+                        $country = $country->getCountryByTag2($informations[1]);
+                        $this->_currentVisitor->setCountry($country['countryName']);
+                        $this->_currentVisitor->setCountryTag2($country['countryTag2']);
+                        $this->_currentVisitor->setCountryTag3($country['countryTag3']);
+                        break;
+                    }
+                }
+                $count+=1;
+            }
         }
 
     }

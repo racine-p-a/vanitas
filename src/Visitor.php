@@ -181,13 +181,22 @@ class Visitor
 
 
         // It's done, let's record it.
+        $this->addEntry();
+    }
+
+    /**
+     * Add an entry in the csv containing all visitors. Data come from current object Visitor.
+     * @throws Exception
+     */
+    private function addEntry()
+    {
         if(!file_exists(__DIR__ . '/data/VanitasVisitors.csv')) {
             throw new Exception('Can not find file VanitasVisitors.csv .');
         }
         if(!is_readable(__DIR__ . '/data/VanitasVisitors.csv')) {
             throw new Exception('File VanitasVisitors.csv exists but is unreadable.');
         }
-        $fp = fopen(__DIR__ . '/data/VanitasVisitors.csv', 'w');
+        $fp = fopen(__DIR__ . '/data/VanitasVisitors.csv', 'a');
         $dataTable = array(
             $this->_date,
             $this->_hour,
@@ -212,53 +221,6 @@ class Visitor
         );
         fputcsv($fp, $dataTable, ',', '"');
         fclose($fp);
-    }
-
-
-
-
-
-    /**
-     * Add a line of information about the current visitor to the csv file.
-     */
-    private function addEntryToTsv()
-    {
-        try
-        {
-            $ligneAInserer =
-                $this->ipVisiteur . "\t" .
-                $this->paysVisiteur . "\t" .
-                $this->codePaysVisiteur . "\t" .
-                $this->villeVisiteur . "\t" .
-                $this->codeContinent . "\t" .
-                $this->latitudeVisiteur . "\t" .
-                $this->longitudeVisiteur . "\t" .
-                $this->organisationVisiteur . "\t" .
-                $this->pageVue . "\t" .
-                $this->origineVisite . "\t" .
-                $this->dateVisite . "\t" .
-                $this->heureVisite . "\t" .
-                $this->moteurDeRenduVisiteur . "\t" .
-                $this->agentType . "\t" .
-                $this->agentName . "\t" .
-                $this->agentVersion . "\t" .
-                $this->OSName . "\t" .
-                $this->OSVersionNumber . "\t" .
-                $this->OSplateForme . "\t" .
-                $this->nomMachine . "\t" .
-                $this->marque . "\t" .
-                $this->modele . "\n"
-            ;
-
-            file_put_contents(__DIR__ . '/data/VanitasVisitors.csv', $ligneAInserer, FILE_APPEND | LOCK_EX);
-        }
-        catch (Exception $e)
-        {
-            require_once __DIR__ . '/errors.php';
-            new Errors(
-                'Erreur ! Impossible de lire le fichier /data/VanitasVisitors.csv.',
-                'Error : Unable to open the file « /data/VanitasVisitors.csv »');
-        }
     }
 
     /**
