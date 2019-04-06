@@ -62,39 +62,66 @@ class Visitor
         'countryTag3'=>'',
     );
 
-/*
+    /**
+     * @var string The raw user agent sent by the visitor.
+     */
+    private $_userAgent = '';
+
+    /**
+     * @var bool Is the visitor a bot ?
+     */
+    private $_isBot = false;
 
 
-    private $villeVisiteur = '';
+    /*
+     *              BROWSER
+     */
+    /**
+     * @var string Visitor's browser name.
+     */
+    private $_browserName = '';
 
-    private $codeContinent = '';
+    /**
+     * @var string Visitor's browser version.
+     */
+    private $_browserVersion = '';
 
-    private $latitudeVisiteur = '';
+    /**
+     * @var string Visitor's browser engine.
+     */
+    private $_browserEngine = '';
 
-    private $longitudeVisiteur = '';
+    /*
+     *              HARDWARE
+     */
+    /**
+     * @var bool Is the processor design in 64 bits ?
+     */
+    private $_processor64 = false;
 
-    private $organisationVisiteur = '';
+    /**
+     * @var bool Is the visitor using a mobile device ?
+     */
+    private $_isMobileDevice = false;
 
-    private $moteurDeRenduVisiteur = '';
+    /*
+     *              OS
+     */
+    /**
+     * @var string Visitor's operanding system family.
+     */
+    private $_osFamily = '';
 
-    private $agentType = '';
+    /**
+     * @var string Visitor's operanding system version.
+     */
+    private $_osVersion = '';
 
-    private $agentName = '';
+    /**
+     * @var string Visitor's operanding system name.
+     */
+    private $_osName = '';
 
-    private $agentVersion = '';
-
-    private $OSName = '';
-
-    private $OSVersionNumber = '';
-
-    private $OSplateForme = '';
-
-    private $nomMachine = '';
-
-    private $marque = '';
-
-    private $modele = '';
-    */
 
     /**
      * Visitor constructor.
@@ -116,6 +143,7 @@ class Visitor
         $this->_date = date('Y-m-d');
         $this->_hour = date('H:i:s');
         $this->_requestedPage = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+        $this->_userAgent = $_SERVER['HTTP_USER_AGENT'];
         if( isset($_SERVER['HTTP_REFERER']) )
         {
             $this->_comingFromUrl = $_SERVER['HTTP_REFERER'];
@@ -129,6 +157,10 @@ class Visitor
             $this->_isIPV4 = false;
             $this->_isIPV6 = true;
         }
+
+        // The browser engine ?
+        $this->_browserEngine = $this->getBrowserEngine();
+
         /*
          * Easy stuff is done. Now let's make the difficult ones :
          * - extract informations from the IP.
@@ -136,65 +168,51 @@ class Visitor
          */
 
         // --> extract informations from IP
-        require_once 'IPData.php';
+        require_once __DIR__ . '/IPData.php';
         try {
             new IPData($this);
         } catch (Exception $e) {
             echo '<p>Error : ',  $e->getMessage(), '</p>';
         }
-        var_dump($this);
-        /*
 
-        $this->getIPAPIData();
-
-
+        // -> extract informations from user agent
+        require_once __DIR__ . '/UserAgentData.php';
+        new UserAgentData($this);
 
 
-        //$this->moteurDeRenduVisiteur = $this->recupererMoteurDeRendu(); // Plus nécesaire avec bibliothèque useragent
-        $this->getUserAgentData();
-
-        $this->addEntryToTsv();
-*/
+        // It's done, let's record it.
+        if(!file_exists(__DIR__ . '/data/VanitasVisitors.csv')) {
+            throw new Exception('Can not find file VanitasVisitors.csv .');
+        }
+        if(!is_readable(__DIR__ . '/data/VanitasVisitors.csv')) {
+            throw new Exception('File VanitasVisitors.csv exists but is unreadable.');
+        }
+        $fp = fopen(__DIR__ . '/data/VanitasVisitors.csv', 'w');
+        $dataTable = array(
+            $this->_date,
+            $this->_hour,
+            $this->_ipVisitor,
+            $this->isIPV4(),
+            $this->isIPV6(),
+            $this->_requestedPage,
+            $this->_comingFromUrl,
+            $this->_countryVisitor['countryName'],
+            $this->_countryVisitor['countryTag2'],
+            $this->_countryVisitor['countryTag3'],
+            $this->_userAgent,
+            $this->_isBot,
+            $this->_browserName,
+            $this->_browserVersion,
+            $this->_browserEngine,
+            $this->_processor64,
+            $this->_isMobileDevice,
+            $this->_osFamily,
+            $this->_osVersion,
+            $this->_osName,
+        );
+        fputcsv($fp, $dataTable, ',', '"');
+        fclose($fp);
     }
-
-    public function getIpVisitor()
-    {
-        return $this->_ipVisitor;
-    }
-
-    public function isIPV4()
-    {
-        return $this->_isIPV4;
-    }
-    public function isIPV6()
-    {
-        return $this->_isIPV6;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -243,168 +261,12 @@ class Visitor
         }
     }
 
-
-    /**
-     * Makes a curl request to IP API in order to get some informations about current visitor.
-     */
-    private function getIPAPIData()
-    {
-        $curl = curl_init('https://ipapi.co/' . $this->ipVisiteur . '/json/');
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT_MS, 1000);
-        curl_setopt($curl, CURLOPT_TIMEOUT_MS, 2000);
-        $resultat = curl_exec($curl);
-        if( $resultat=== false)
-        {
-            new Errors(
-                'La requête à IP API a échoué : ' . $this->ipVisiteur,
-                'IP API request failed : ' . $this->ipVisiteur);
-        }
-        else
-        {
-            $resultatCurl = json_decode($resultat);
-            foreach ($resultatCurl as $clef=>$valeur)
-            {
-                switch ($clef)
-                {
-                    case 'city':
-                        $this->villeVisiteur = $valeur;
-                        break;
-                    case 'country_name':
-                        $this->paysVisiteur = $valeur;
-                        break;
-                    case 'country':
-                        $this->codePaysVisiteur = $valeur;
-                        break;
-                    case 'continent_code':
-                        $this->codeContinent = $valeur;
-                        break;
-                    case 'latitude':
-                        $this->latitudeVisiteur = $valeur;
-                        break;
-                    case 'longitude':
-                        $this->longitudeVisiteur = $valeur;
-                        break;
-                    case 'org':
-                        $this->organisationVisiteur = $valeur;
-                        break;
-
-                }
-            }
-        }
-        curl_close($curl);
-    }
-
-    /**
-     * Makes a curl request to user agent data in order to get some informations about visitor's browser.
-     * @see https://github.com/matomo-org/device-detector
-     */
-    private function getUserAgentData()
-    {
-        DeviceParserAbstract::setVersionTruncation(DeviceParserAbstract::VERSION_TRUNCATION_NONE);
-        $userAgent = $_SERVER['HTTP_USER_AGENT']; // change this to the useragent you want to parse
-        $dd = new DeviceDetector($userAgent);
-        $dd->parse();
-
-        if ($dd->isBot())
-        {
-            // handle bots,spiders,crawlers,...
-            $botInfo = $dd->getBot();
-            new Error($botInfo);
-        }
-        else
-        {
-            $clientInfo = $dd->getClient(); // holds information about browser, feed reader, media player, ...
-            $this->agentType = $clientInfo['type'];
-            $this->agentName = $clientInfo['name'];
-            $this->agentVersion = $clientInfo['version'];
-            $this->moteurDeRenduVisiteur = $clientInfo['engine'];
-
-            $osInfo = $dd->getOs();
-            $this->OSName = $osInfo['name'];
-            $this->OSVersionNumber = $osInfo['version'];
-            $this->OSplateForme = $osInfo['platform'];
-
-            $this->nomMachine = $dd->getDeviceName();
-
-            $this->marque = $dd->getBrandName();
-            $this->modele = $dd->getModel();
-        }
-
-        /*
-        $curl = curl_init('http://www.useragentstring.com/?uas=' . urlencode($_SERVER['HTTP_USER_AGENT']) . '&getJSON=all');
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_COOKIESESSION, true);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 2);
-        $resultat = curl_exec($curl);
-        if( $resultat=== false)
-        {
-            new Errors(
-                'La requête à user agent data a échoué : ' . $this->ipVisiteur . ' et user agent : ' . $_SERVER['HTTP_USER_AGENT'],
-                'user agent data request failed : ' . $this->ipVisiteur . ' and user agent : ' . $_SERVER['HTTP_USER_AGENT']
-            );
-        }
-        else
-        {
-            $resultatCurlMatos = json_decode(curl_exec($curl));
-            if($resultatCurlMatos!=null)
-            {
-                foreach ($resultatCurlMatos as $clef=>$valeur)
-                {
-                    switch ($clef)
-                    {
-                        case 'agent_type':
-                            $this->agentType = $valeur;
-                            break;
-                        case 'agent_name':
-                            $this->agentName = $valeur;
-                            break;
-                        case 'agent_version':
-                            $this->agentVersion = $valeur;
-                            break;
-                        case 'os_type':
-                            $this->OSType = $valeur;
-                            break;
-                        case 'os_name':
-                            $this->OSName = $valeur;
-                            break;
-                        case 'os_versionName':
-                            $this->OSVersionName = $valeur;
-                            break;
-                        case 'os_versionNumber':
-                            $this->OSVersionNumber = $valeur;
-                            break;
-                        case 'os_producer':
-                            $this->OSProducer = $valeur;
-                            break;
-                        case 'os_producerURL':
-                            $this->OSProducerUrl = $valeur;
-                            break;
-                        case 'linux_distibution':
-                            $this->linuxDistribution = $valeur;
-                            break;
-                        case 'agent_language':
-                            $this->agentLanguage = $valeur;
-                            break;
-                        case 'agent_languageTag':
-                            $this->agentLanguageTag = $valeur;
-                            break;
-                    }
-                }
-            }
-        }
-        curl_close($curl);
-        */
-    }
-
-
     /**
      * Get browser engine which is written in the $_SERVER['HTTP_USER_AGENT']
      * @see https://developer.mozilla.org/fr/docs/Web/HTTP/Detection_du_navigateur_en_utilisant_le_user_agent
      * @return string
      */
-    private function recupererMoteurDeRendu()
+    private function getBrowserEngine()
     {
         if(strpos($_SERVER['HTTP_USER_AGENT'], 'Gecko') !== false)
             return 'Gecko';
@@ -416,7 +278,7 @@ class Visitor
             return 'Trident';
         elseif(strpos($_SERVER['HTTP_USER_AGENT'], 'Chrome') !== false)
             return 'Blink';
-        return $_SERVER['HTTP_USER_AGENT'];
+        return 'Other';
     }
 
     /**
@@ -452,6 +314,12 @@ class Visitor
         return $ip;
     }
 
+
+
+
+    /*
+     *          SETTERS
+     */
     public function setCountry($countryName='')
     {
         $this->_countryVisitor['countryName'] = $countryName;
@@ -463,5 +331,53 @@ class Visitor
     public function setCountryTag3($countryTag3='')
     {
         $this->_countryVisitor['countryTag3'] = $countryTag3;
+    }
+    public function setBrowserName($browserName='')
+    {
+        $this->_browserName = $browserName;
+    }
+    public function setBrowserVersion($browserVersion='')
+    {
+        $this->_browserVersion = $browserVersion;
+    }
+    public function setProcessorDesign($processorDesign=false)
+    {
+        $this->_processor64 = $processorDesign;
+    }
+    public function setMobileDevice($mobileDevice=false)
+    {
+        $this->_isMobileDevice = $mobileDevice;
+    }
+    public function setRobot($robot=false)
+    {
+        $this->_isBot = $robot;
+    }
+    public function setOS($osFamily='')
+    {
+        $this->_osFamily = $osFamily;
+    }
+    public function setOSVersion($osVersion='')
+    {
+        $this->_osVersion = $osVersion;
+    }
+    public function setOSName($osName='')
+    {
+        $this->_osName = $osName;
+    }
+
+    /*
+     *          GETTERS
+     */
+    public function getIpVisitor()
+    {
+        return $this->_ipVisitor;
+    }
+    public function isIPV4()
+    {
+        return $this->_isIPV4;
+    }
+    public function isIPV6()
+    {
+        return $this->_isIPV6;
     }
 }

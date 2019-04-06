@@ -28,17 +28,15 @@ class IPData
     {
         if($this->_currentVisitor->isIPV4()) {
             // IPV4 file.
+            $convertedIP = $this->convertIpToInt($this->_currentVisitor->getIpVisitor());
+
             if(!file_exists(__DIR__ . '/data/geo-ip/IpToCountry.csv')) {
                 throw new Exception('Can not find file IpToCountry.csv .');
             }
             if(!is_readable(__DIR__ . '/data/geo-ip/IpToCountry.csv')) {
                 throw new Exception('File IpToCountry.csv exists but is unreadable.');
             }
-            $convertedIP = $this->convertIpToInt($this->_currentVisitor->getIpVisitor());
-            // Fetch the correct line in the file.
-            /*foreach ($this->getCorrectLineFromIpFile(__DIR__ . '/data/geo-ip/IpToCountry.csv') as $line) {
-                var_dump($line);
-            }*/
+
             require_once __DIR__ . '/BigFileIterator.php';
             $largefile = new BigFileIterator(__DIR__ . '/data/geo-ip/IpToCountry.csv');
             $iterator = $largefile->iterate("Text");
@@ -54,12 +52,8 @@ class IPData
                         break;
                     }
                 }
-
-                $count+=1;
-
+            $count+=1;
             }
-
-
         } elseif ($this->_currentVisitor->isIPV6()) {
             // IPV6 file.
             if(!file_exists(__DIR__ . '/data/geo-ip/IpToCountry.6R.csv')) {
@@ -71,23 +65,6 @@ class IPData
         }
 
     }
-
-    private function getCorrectLineFromIpFile($path) {
-        /*$handle = fopen($path, "r");
-
-        while(!feof($handle)) {
-            $line = fgetcsv($handle, 95, ",");
-            if (count($line)==7) {
-                yield fgetcsv($handle, 95, ",");
-            }
-        }
-
-        fclose($handle);*/
-
-    }
-
-
-
 
 
     /**
