@@ -55,11 +55,11 @@ deserve it. License [donationware](http://software77.net/geo-ip/?license).
 
 To parse the user-agent, I used Wolfcast's great work :
 [BrowserDetection](https://github.com/Wolfcast/BrowserDetection). License
-[GNU LGPL](GNU Lesser General Public License) Thanks to him/them.
+[GNU LGPL](http://www.gnu.org/licenses/lgpl.html) Thanks to him/them.
 
 ## How to use
 
-Follow the [wiki](https://github.com/racine-p-a/vanitas/wiki).
+See the [wiki](https://github.com/racine-p-a/vanitas/wiki). It is quick to read with examples.
 
 ## Next planned updates
 
