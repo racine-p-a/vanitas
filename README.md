@@ -59,6 +59,8 @@ To parse the user-agent, I used Wolfcast's great work :
 
 ## How to use
 
+Follow the [wiki](https://github.com/racine-p-a/vanitas/wiki).
+
 ## Next planned updates
 
 - Trying [Maxmind](https://dev.maxmind.com/geoip/geoip2/geolite2/) database if it is
