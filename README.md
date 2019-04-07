@@ -59,7 +59,7 @@ To parse the user-agent, I used Wolfcast's great work :
 
 ## How to use
 
-## Next updates
+## Next planned updates
 
 - Trying [Maxmind](https://dev.maxmind.com/geoip/geoip2/geolite2/) database if it is
 more efficient.
