@@ -1,5 +1,16 @@
 <?php
-
+/**
+ * PROJET VANITAS.
+ * @author  Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
+ * @copyright Copyright (c) 2019, Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
+ * @license http://www.gnu.org/licenses/lgpl.html
+ * @date 04/11/18 20:38
+ *
+ * Class UserAgentData
+ * The class gets all informations from the user-agent using Wolfcast'browserDetection.
+ *
+ * @link https://github.com/racine-p-a/vanitas
+ */
 require_once __DIR__ . '/Visitor.php';
 
 class UserAgentData

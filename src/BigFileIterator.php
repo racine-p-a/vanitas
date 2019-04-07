@@ -1,9 +1,18 @@
 <?php
-
 /**
- * Huge thanks to Mokhtar Ebrahim on his website : https://likegeeks.com/process-large-files-using-php/
+ * PROJET VANITAS.
+ * @author  Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
+ * @copyright Copyright (c) 2019, Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
+ * @license http://www.gnu.org/licenses/lgpl.html
+ * @date 04/11/18 20:38
+ *
  * Class BigFileIterator
+ * The class iterates on big files in an efficient way.
+ * Huge thanks to Mokhtar Ebrahim on his website : https://likegeeks.com/process-large-files-using-php/
+ *
+ * @link https://github.com/racine-p-a/vanitas
  */
+
 class BigFileIterator
 {
     protected $file;

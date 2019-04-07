@@ -1,5 +1,16 @@
 <?php
-
+/**
+ * PROJET VANITAS.
+ * @author  Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
+ * @copyright Copyright (c) 2019, Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
+ * @license http://www.gnu.org/licenses/lgpl.html
+ * @date 04/11/18 20:38
+ *
+ * Class IPData
+ * The class gets all informations about a certain IP adress.
+ *
+ * @link https://github.com/racine-p-a/vanitas
+ */
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);

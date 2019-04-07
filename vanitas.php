@@ -2,14 +2,14 @@
 /**
  * PROJET VANITAS.
  * @author  Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
- * @copyright Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
- * @license http://www.cecill.info/licences/Licence_CeCILL-C_V1-fr.html LICENCE DE LOGICIEL LIBRE CeCILL-C
+ * @copyright Copyright (c) 2019, Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
+ * @license http://www.gnu.org/licenses/lgpl.html
  * @date 04/11/18 20:38
  *
- * Contexte : Ce fichier est celui à appeler pour utiliser l'application Vanitas. Ce script doit récupérer les
- * informations du vsiteur courant et les stocker dans un fichier .tsv.
+ * This the file to call if you want to gather informations about your current visitor. Data will be
+ * recorded in a .csv file.
  *
- * @link https://github.com/racine-p-a/p-a-racine
+ * @link https://github.com/racine-p-a/vanitas
  */
 
 ini_set('display_errors', 1);
