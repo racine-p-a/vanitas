@@ -19,7 +19,7 @@ detected and stored in a blink (less than 0.10 sec)
 ## Why not choose Vanitas
 
 - You want very accurate geographic data ? Sorry, the application is only precise up
-to countries. I lack of more specific, efficient and reliable data. 
+to countries. I lack of more specific, efficient and reliable data.... nope for along I hope.
 
 ## The date recorded
 
