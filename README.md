@@ -31,10 +31,10 @@ The data that would be available to you are :
 - Is it IPV4 ? : 1
 - Is it IPV6 ? : 0
 - Visited page : http://www.example.com/
-- Coming from url : http://www.olderExample.com/
-- Country : France
-- Country Tag (2 letters) : ZZ
-- Country Tag(3 letters) : ZZZ
+- Coming from url : http://www.olderExample.com/ 
+- Country name : France
+- Country tag (2 letters) : FR
+- Country tag (3 letters) : FRA
 - User-agent : "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0"
 - Is it a bot ? : 1
 - Browser name : Firefox
