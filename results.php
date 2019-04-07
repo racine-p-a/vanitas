@@ -1,14 +1,15 @@
 <?php
 /**
- * PROJET SITE PERSO
+ * PROJET VANITAS.
  * @author  Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
- * @copyright Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
- * @license http://www.cecill.info/licences/Licence_CeCILL-C_V1-fr.html LICENCE DE LOGICIEL LIBRE CeCILL-C
- * @date 25/11/18 11:19
+ * @copyright Copyright (c) 2019, Pierre-Alexandre RACINE <patcha.dev at{@} gmail dot[.] com>
+ * @license http://www.gnu.org/licenses/lgpl.html
+ * @date 04/11/18 20:38
  *
- * Contexte : TODO
+ * Class Results
+ * Get the data recorded and prepare them for a fancy display.
  *
- * @link https://github.com/racine-p-a/p-a-racine
+ * @link https://github.com/racine-p-a/vanitas
  */
 
 ini_set('display_errors', 1);
