@@ -50,12 +50,12 @@ The data that would be available to you are :
 ## Tools/library used
 
 To gather IP informations, I got the set from [geo-ip](http://software77.net/geo-ip/).
-Would you please consider make them a donation (even a tiny one) because they truly
+Would you please consider make them a donation (even a tiny one) ? Because they truly
 deserve it. License [donationware](http://software77.net/geo-ip/?license).
 
 To parse the user-agent, I used Wolfcast's great work :
 [BrowserDetection](https://github.com/Wolfcast/BrowserDetection). License
-[GNU LGPL](GNU Lesser General Public License)
+[GNU LGPL](GNU Lesser General Public License) Thanks to him/them.
 
 ## How to use
 
