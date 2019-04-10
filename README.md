@@ -27,26 +27,26 @@ The data that would be available to you are (with examples) :
 
 Information name | Example
 ---|---
-- Date | 2019-04-07
-- Hour | 10:31:24
-- IP adress | 127.0.0.1
-- Is it IPV4 ? | 1
-- Is it IPV6 ? | 0
-- Visited page | http://www.example.com/
-- Coming from url | http://www.olderExample.com/ 
-- Country name | France
-- Country tag (2 letters) | FR
-- Country tag (3 letters) | FRA
-- User-agent | "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0"
-- Is it a bot ?| 1
-- Browser name | Firefox
-- Browser version | 66.0
-- Browser engine | Gecko,
-- Processor architecture (is 64 bits ?) | 1
-- Using a mobile device | 1
-- OS family | Linux,
-- OS version | "NT 6.3"
-- OS name | "Windows 8.1"
+Date | 2019-04-07
+Hour | 10:31:24
+IP adress | 127.0.0.1
+Is it IPV4 ? | 1
+Is it IPV6 ? | 0
+Visited page | http://www.example.com/
+Coming from url | http://www.olderExample.com/ 
+Country name | France
+Country tag (2 letters) | FR
+Country tag (3 letters) | FRA
+User-agent | "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0"
+Is it a bot ? | 1
+Browser name | Firefox
+Browser version | 66.0
+Browser engine | Gecko,
+Processor architecture (is 64 bits ?) | 1
+Using a mobile device | 1
+OS family | Linux,
+OS version | "NT 6.3"
+OS name | "Windows 8.1"
 
 
 ## Tools/library used
