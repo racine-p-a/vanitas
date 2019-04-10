@@ -21,30 +21,32 @@ detected and stored in a blink (less than 0.10 sec)
 - You want very accurate geographic data ? Sorry, the application is only precise up
 to countries. I lack of more specific, efficient and reliable data.... nope for along I hope.
 
-## The date recorded
+## The data recorded
 
-The data that would be available to you are :
+The data that would be available to you are (with examples) :
 
-- Date : 2019-04-07
-- Hour : 10:31:24
-- IP adress : 127.0.0.1
-- Is it IPV4 ? : 1
-- Is it IPV6 ? : 0
-- Visited page : http://www.example.com/
-- Coming from url : http://www.olderExample.com/ 
-- Country name : France
-- Country tag (2 letters) : FR
-- Country tag (3 letters) : FRA
-- User-agent : "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0"
-- Is it a bot ? : 1
-- Browser name : Firefox
-- Browser version : 66.0
-- Browser engine : Gecko,
-- Processor architecture (is 64 bits ?) : 1
-- Using a mobile device : 1
-- OS family : Linux,
-- OS version : unknown
-- OS name : unknown
+Information name | Example
+---|---
+- Date | 2019-04-07
+- Hour | 10:31:24
+- IP adress | 127.0.0.1
+- Is it IPV4 ? | 1
+- Is it IPV6 ? | 0
+- Visited page | http://www.example.com/
+- Coming from url | http://www.olderExample.com/ 
+- Country name | France
+- Country tag (2 letters) | FR
+- Country tag (3 letters) | FRA
+- User-agent | "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:66.0) Gecko/20100101 Firefox/66.0"
+- Is it a bot ?| 1
+- Browser name | Firefox
+- Browser version | 66.0
+- Browser engine | Gecko,
+- Processor architecture (is 64 bits ?) | 1
+- Using a mobile device | 1
+- OS family | Linux,
+- OS version | "NT 6.3"
+- OS name | "Windows 8.1"
 
 
 ## Tools/library used
@@ -60,6 +62,16 @@ To parse the user-agent, I used Wolfcast's great work :
 ## How to use
 
 See the [wiki](https://github.com/racine-p-a/vanitas/wiki). It is quick to read with examples.
+
+## Limitations
+
+Informations are extracted from IP et user-agent sent by your visitor thus fiability is bound
+to those two data.
+- People can send fake IP to disturb your application/website or use proxies (although *vanitas*
+can still detect beyond proxies in some cases)
+- People can customize their browser in order to make them appear as different. There are many
+plugins for each browser that allow their users to tailor their user-agent as they desire. Bots
+often rarely bother to declare more than a quite simple one. 
 
 ## Next planned updates
 
