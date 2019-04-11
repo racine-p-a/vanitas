@@ -1,6 +1,6 @@
-<div style="text-align:center">
+<p align="center">
 <img src="https://github.com/racine-p-a/vanitas/blob/master/src/img/vanitasLogo.svg" alt="drawing" width="100" height=100 />
-</div>
+</p>
 
 # Vanitas
 
