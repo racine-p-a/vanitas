@@ -1,4 +1,6 @@
-<img style="display: block;margin-left: auto;margin-right: auto;" src="https://github.com/racine-p-a/vanitas/blob/master/src/img/vanitasLogo.svg" alt="drawing" width="100" heught=100 />
+<p style="text-align:center;">
+<img src="https://github.com/racine-p-a/vanitas/blob/master/src/img/vanitasLogo.svg" alt="drawing" width="100" heught=100 />
+</p>
 
 # Vanitas
 
