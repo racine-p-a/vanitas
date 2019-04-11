@@ -1,5 +1,7 @@
 # Vanitas
 
+
+
 Vanitas is a project in pure PHP using only simple functions and internal data.
 Its goal is to give you various metrics about peoples and bots acceding your webiste.
 
@@ -44,7 +46,7 @@ Browser version | 66.0
 Browser engine | Gecko,
 Processor architecture (is 64 bits ?) | 1
 Using a mobile device | 1
-OS family | Linux,
+OS family | Linux
 OS version | "NT 6.3"
 OS name | "Windows 8.1"
 

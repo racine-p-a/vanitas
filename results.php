@@ -17,20 +17,54 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// TODO Factoriser les appels de constructions de charts.
-// TODO Passage des couleurs possible.
-// TODO couleurs par défaut pour certains cas comme navigateurs.
-// TODO Groupes e,semble les autres lnux dans les os
-// TODO Multilinguisme
-
 
 class Results
 {
-    private $data = array();
+    /**
+     * @var array The date read in the .csv file
+     */
+    private $_data = array();
+
+
+    private $_authorizedSetsOfData = array(
+        'date',
+    );
 
     /**
      * Results constructor.
+     * @param string $dataName The name of the data to exploit and order.
+     * @throws Exception
      */
+    public function __construct($dataName='')
+    {
+        if(!in_array($dataName, $this->_authorizedSetsOfData)) {
+            $errorMessage = 'Unknown type of data asked : ' . $dataName . ' . Please choose one of them : ';
+            $count=0;
+            while ($count<count($this->_authorizedSetsOfData)) {
+                $errorMessage .= $this->_authorizedSetsOfData[$count];
+                if ($count< count($this->_authorizedSetsOfData)-1) {
+                    $errorMessage .= ',';
+                }
+                $count+=1;
+            }
+            $errorMessage .= '.';
+            throw new Exception($errorMessage);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    /*
+        /**
+         * Results constructor.
+         *//*
     public function __construct()
     {
         $this->orderData();
@@ -39,7 +73,7 @@ class Results
     /**
      * Returns the date and the hour of the first occurence in the date.
      * @return array An array looking like (YYYY-MM-DD, HH:MM:SS).
-     */
+     *//*
     public function getTimeFirstOccurence()
     {
         return array($this->data[0]['date'], $this->data[0]['time']);
@@ -48,7 +82,7 @@ class Results
     /**
      * Return the count of all entries in the data.
      * @return int The count of all entries in the data.
-     */
+     *//*
     public function getEntriesCount()
     {
         return count($this->data);
@@ -1361,7 +1395,7 @@ mymap.addLayer(markers);
 
     /*
      *          BROWSER
-     */
+     *//*
 
     /**
      * Returns a complete HTML/js code containing a div which contains a canvas containing the barchart
@@ -1372,7 +1406,7 @@ mymap.addLayer(markers);
      * @param string $idDiv
      * @param string $title
      * @return string
-     */
+     *//*
     public function getBrowserBarChart($height='', $width='', $class='', $idCanevas='', $idDiv='', $title='' )
     {
         if($idCanevas=='')
@@ -1460,7 +1494,7 @@ mymap.addLayer(markers);
      * @param string $typeChart TYpe of desired chart pie|doughnut.
      * @param string $title Title of the chart
      * @return string The complete HTML js code of the cart.
-     */
+     *//*
     public function getBrowserPieChart($height='', $width='', $class='', $idCanevas='', $idDiv='', $typeChart='pie', $title='')
     {
         if($idCanevas=='')
@@ -1624,7 +1658,7 @@ mymap.addLayer(markers);
     /**
      * Returns just a dummy example of a working chart with hardcoded data.
      * @return string
-     */
+     *//*
     public function getExample()
     {
         return '
@@ -1692,7 +1726,7 @@ mymap.addLayer(markers);
      * @see https://stackoverflow.com/questions/4356289/php-random-string-generator
      * @param int $length Optionnal, the length of the desired random string. If inexplicit, it will be set to 10.
      * @return string The random string generated.
-     */
+     *//*
     private function generateRandomString($length = 10)
     {
         $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -1708,7 +1742,7 @@ mymap.addLayer(markers);
      * Returns an array of flat colors in hexadecimal values.
      * @param int $nbColor The number of desired colors.
      * @return array The array of flat colors in hexadecimal values.
-     */
+     *//*
     private function getRandomColors($nbColor =1)
     {
         $proposedColors = [
@@ -1750,7 +1784,7 @@ mymap.addLayer(markers);
      * Generator reading the file (this one could be huge, generators became mandatory)
      * @param string $pathToFile The path to the file to open and iterate to.
      * @return Generator Generator iterating upon the lines.
-     */
+     *//*
     private function getLinesFromFile($pathToFile='')
     {
         $fileHandle = fopen($pathToFile, 'r');
@@ -1764,7 +1798,7 @@ mymap.addLayer(markers);
     /**
      * Data are just in a csv file. Each line of the file has to be extracted and each entry of the line has to
      * be extracted too.
-     */
+     *//*
     private function orderData()
     {
         $lines = $this->getLinesFromFile(__DIR__ . '/src/data/VanitasVisitors.csv');
@@ -1850,5 +1884,5 @@ mymap.addLayer(markers);
                 array_push($this->data, $newEntry);
             }
         }
-    }
+    }*/
 }
