@@ -54,14 +54,26 @@ echo '<!doctype html>
     
     <body>
         ' . $myResults->getChart('linechart', 'hour', $myData, array(
-            'canvasId'=>'myHoursLineChart',
-            'divContainingCanvasId'=>'myHoursLIneChartBlock',
-            'label'=>'Hourly affluence',
-            'color'=>'#3e95cd',
-            'fill'=>'true',
-            'title'=>'Hours Linechart',
-            'height'=>'500px',
-            'width'=>'600px',
-    ) ) . '
+        'canvasId'=>'myHoursLineChart',
+        'divContainingCanvasId'=>'myHoursLineChartBlock',
+        'label'=>'Hourly affluence',
+        'color'=>'#3e95cd',
+        'fill'=>'true',
+        'steppedLine'=>'false', // Gives your line chart an aspect of barchart. Choose among : false, true, before, after, middle.
+        'title'=>'Hours Linechart',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .
+    $myResults->getChart('barchart', 'hour', $myData, array(
+        'canvasId'=>'myHoursBarChart',
+        'divContainingCanvasId'=>'myHoursBarChartBlock',
+        'label'=>'Hourly affluence',
+        'color'=>'#3e95cd',
+        'fill'=>'true',
+        'steppedLine'=>'false', // Gives your line chart an aspect of barchart. Choose among : false, true, before, after, middle.
+        'title'=>'Hours Linechart',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .'
     </body>
 </html>';

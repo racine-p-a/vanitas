@@ -118,8 +118,46 @@ class Results
     {
         if($typeChart=='linechart') {
             return $this->getHourLineChart($data);
+        } else if($typeChart=='barchart') {
+            return $this->getHourBarChart($data);
         }
 
+    }
+
+    private function getHourBarChart(&$data=array())
+    {
+        $codeHTML = '<script>
+        new Chart(document.getElementById(\'' . $this->_currentChartOptions['canvasId'] . '\').getContext(\'2d\'), {
+            type: "bar",
+            data: {
+                labels: ["00H00","01H00","02H00","03H00","04H00","05H00","06H00","07H00","08H00","09H00","10H00","11H00","12H00","13H00","14H00","15H00","16H00","17H00","18H00","19H00","20H00","21H00","22H00","23H00",],
+                datasets: [{
+                    data: [';
+
+        foreach ($this->getHourRepartition($data) as $hour=>$qty)
+        {
+            $codeHTML .= $qty . ',';
+        }
+
+
+        $codeHTML .= '],
+                    steppedLine:' . $this->_currentChartOptions['steppedLine'] . ',
+                    label: "' . $this->_currentChartOptions['label'] . '",
+                    backgroundColor: "' . $this->_currentChartOptions['color'] . '",
+                    fill: ' . $this->_currentChartOptions['fill'] . '
+                    },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "' . $this->_currentChartOptions['title'] . '"
+    }
+  }
+});
+    </script>';
+
+        return $codeHTML;
     }
 
     private function getHourLineChart(&$data=array())
@@ -139,6 +177,7 @@ class Results
 
 
         $codeHTML .= '],
+                    steppedLine:' . $this->_currentChartOptions['steppedLine'] . ',
                     label: "' . $this->_currentChartOptions['label'] . '",
                     borderColor: "' . $this->_currentChartOptions['color'] . '",
                     fill: ' . $this->_currentChartOptions['fill'] . '
@@ -156,121 +195,6 @@ class Results
 
         return $codeHTML;
     }
-
-
-
-
-
-    /*
-    public function getHoursLineChart($height='', $width='', $class='', $idCanevas='', $idDiv='', $title='' )
-    {
-        if($idCanevas=='')
-        {
-            $idCanevas = $this->generateRandomString();
-        }
-        if ($height=='')
-        {
-            $height = 400;
-        }
-        if ($width=='')
-        {
-            $width = 600;
-        }
-        $browserData = array();
-        foreach ($this->data as $datum)
-        {
-            if(!key_exists($datum['deviceName'], $browserData))
-            {
-                $browserData[$datum['deviceName']]=1;
-            }
-            else
-            {
-                $browserData[$datum['deviceName']]++;
-            }
-        }
-        $hoursData = array(
-            '00'=>0,
-            '01'=>0,
-            '02'=>0,
-            '03'=>0,
-            '04'=>0,
-            '05'=>0,
-            '06'=>0,
-            '07'=>0,
-            '08'=>0,
-            '09'=>0,
-            '10'=>0,
-            '11'=>0,
-            '12'=>0,
-            '13'=>0,
-            '14'=>0,
-            '15'=>0,
-            '16'=>0,
-            '17'=>0,
-            '18'=>0,
-            '19'=>0,
-            '20'=>0,
-            '21'=>0,
-            '22'=>0,
-            '23'=>0,
-        );
-        foreach ($this->data as $datum)
-        {
-            $hour = explode(':', $datum['time'])[0];
-            if(key_exists($hour, $hoursData))
-            {
-                $hoursData[$hour]++;
-            }
-        }
-
-        $codeHTML = '
-    <div id="' . $idDiv . '" class="' . $class . '" style="width: ' . $width . 'px; height: ' . $height . 'px;">
-        <canvas id="' . $idCanevas . '" style="position: relative;"></canvas>
-    </div>
-    <script>
-        new Chart(document.getElementById("' . $idCanevas . '"), {
-            type: "line",
-            data: {
-                labels: ["", "00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00",],
-                datasets: [{
-                    data: [';
-
-        foreach ($hoursData as $hour=>$qty)
-        {
-            $codeHTML .= $qty . ',';
-        }
-
-
-        $codeHTML .= '],
-                    label: "Affluence",
-                    borderColor: "#3e95cd",
-                    fill: true
-                    },
-    ]
-  },
-  options: {
-    title: {
-      display: true,
-      text: "' . $title . '"
-    }
-  }
-});
-
-
-    </script>
-    ';
-        return $codeHTML;
-    }
-
-
-
-
-
-
-
-
-
-
 
 
     /*
@@ -1323,101 +1247,6 @@ mymap.addLayer(markers);
     }
 
 
-    public function getHoursBarChart($height='', $width='', $class='', $idCanevas='', $idDiv='', $title='' )
-    {
-        if($idCanevas=='')
-        {
-            $idCanevas = $this->generateRandomString();
-        }
-        if ($height=='')
-        {
-            $height = 400;
-        }
-        if ($width=='')
-        {
-            $width = 600;
-        }
-        $hoursData = array(
-            '00'=>0,
-            '01'=>0,
-            '02'=>0,
-            '03'=>0,
-            '04'=>0,
-            '05'=>0,
-            '06'=>0,
-            '07'=>0,
-            '08'=>0,
-            '09'=>0,
-            '10'=>0,
-            '11'=>0,
-            '12'=>0,
-            '13'=>0,
-            '14'=>0,
-            '15'=>0,
-            '16'=>0,
-            '17'=>0,
-            '18'=>0,
-            '19'=>0,
-            '20'=>0,
-            '21'=>0,
-            '22'=>0,
-            '23'=>0,
-        );
-        foreach ($this->data as $datum)
-        {
-            $hour = explode(':', $datum['time'])[0];
-            if(key_exists($hour, $hoursData))
-            {
-                $hoursData[$hour]++;
-            }
-        }
-
-        $codeHTML = '
-                <div id="' . $idDiv . '" class="' . $class . '" style="width: ' . $width . 'px;height: ' . $height . 'px;">
-                    <canvas id="' . $idCanevas .'" ></canvas>
-                </div>
-                
-                <script>
-                    new Chart(document.getElementById("' . $idCanevas . '"), {
-    type: "bar",
-    data: {
-      labels: [';
-
-        foreach ($hoursData as $browser=>$quantity)
-        {
-            $codeHTML .= '\'' . $browser . '\', ';
-        }
-
-        $codeHTML .= '],
-      datasets: [
-        {
-          label: "Utilisateurs",
-          backgroundColor: [' . $this->arrayColorToString($this->getRandomColors(count($hoursData))) . '],
-          data: [';
-
-        foreach ($hoursData as $browser=>$quantity)
-        {
-            $codeHTML .= $quantity . ', ';
-        }
-
-        $codeHTML.= ']
-        }
-      ]
-    },
-    options: {
-      legend: { display: false },
-      title: {
-        display: true,
-        text: "' . $title . '"
-      }
-    }
-});
-                </script>
-                ';
-
-        return $codeHTML;
-    }
-
 
     public function getDaysBarChart($height='', $width='', $class='', $idCanevas='', $idDiv='', $title='' )
     {
@@ -1954,6 +1783,7 @@ mymap.addLayer(markers);
             'fill'=>'true',
             'height'=>'400px',
             'label'=>'',
+            'steppedLine'=>'false',
             'title'=>'',
             'width'=>'400px',
         );
@@ -1979,6 +1809,11 @@ mymap.addLayer(markers);
                     break;
                 case 'label':
                     $this->_currentChartOptions['label'] = $optionValue;
+                    break;
+                case 'steppedLine':
+                    if(in_array($optionValue, array('true', 'false', 'before', 'after', 'middle')) ) {
+                        $this->_currentChartOptions['steppedLine'] = $optionValue;
+                    }
                     break;
                 case 'title':
                     $this->_currentChartOptions['title'] = $optionValue;
