@@ -28,29 +28,241 @@ class Results
 
     private $_authorizedSetsOfData = array(
         'date',
+        'hour',
     );
+
+
+    private $_currentChartOptions=array();
 
     /**
      * Results constructor.
-     * @param string $dataName The name of the data to exploit and order.
+     * @param array $dataNames
      * @throws Exception
      */
-    public function __construct($dataName='')
+    public function __construct(array $dataNames=array())
     {
-        if(!in_array($dataName, $this->_authorizedSetsOfData)) {
-            $errorMessage = 'Unknown type of data asked : ' . $dataName . ' . Please choose one of them : ';
-            $count=0;
-            while ($count<count($this->_authorizedSetsOfData)) {
-                $errorMessage .= $this->_authorizedSetsOfData[$count];
-                if ($count< count($this->_authorizedSetsOfData)-1) {
-                    $errorMessage .= ',';
+        foreach ($dataNames as $dataName) {
+            if(!in_array($dataName, $this->_authorizedSetsOfData)) {
+                $errorMessage = 'Unknown type of data asked : ' . $dataName . ' . Please choose one of them : ';
+                $count=0;
+                while ($count<count($this->_authorizedSetsOfData)) {
+                    $errorMessage .= $this->_authorizedSetsOfData[$count];
+                    if ($count< count($this->_authorizedSetsOfData)-1) {
+                        $errorMessage .= ',';
+                    }
+                    $count+=1;
                 }
-                $count+=1;
+                $errorMessage .= '.';
+                throw new Exception($errorMessage);
             }
-            $errorMessage .= '.';
-            throw new Exception($errorMessage);
+            $this->_data[$dataName] = array();
+        }
+
+        // Known type of data asked. Let's fetch it.
+        require_once __DIR__ . '/BigFileIterator.php';
+        $largefile = new BigFileIterator(
+            __DIR__ . '/data/VanitasVisitors.csv'
+        );
+        $iterator = $largefile->iterate("Text");
+        foreach ($iterator as $line) {
+            if(!trim($line)=='') {
+
+                $csvLine = str_getcsv($line);
+
+                foreach ($this->_data as $idArray=>$valueArray) {
+                    switch ($idArray) {
+                        case 'date':
+                            array_push($this->_data['date'], $csvLine[0]);
+                            break;
+                        case 'hour':
+                            array_push($this->_data['hour'], $csvLine[1]);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
         }
     }
+
+    public function getChart($typeChart= '', $dataName = '', $data=array(), $options=array())
+    {
+        if (!in_array($dataName, $this->_authorizedSetsOfData)) {
+            throw new Exception('Unknown type of data asked : ' . $dataName . ' .');
+        }
+
+        $this->manageOptions($options);
+        $codeHTML = '<div id="' . $this->_currentChartOptions['divContainingCanvasId'] . '" class="" style="width:' . $this->_currentChartOptions['width'] . '; height:' . $this->_currentChartOptions['height'] . ';">
+        <canvas id="' . $this->_currentChartOptions['canvasId'] . '" style="position: relative;"></canvas>
+    </div>';
+        switch ($dataName) {
+            case 'date':
+                break;
+            case 'hour':
+                return $codeHTML . $this->manageHours($typeChart, $data);
+                break;
+            default:
+                throw new Exception('Not yet implemented.');
+        }
+
+
+
+    }
+
+    /*******************************************************************************************************************
+     *                                                      HOURS
+     ******************************************************************************************************************/
+
+
+    private function manageHours($typeChart='', &$data=array())
+    {
+        if($typeChart=='linechart') {
+            return $this->getHourLineChart($data);
+        }
+
+    }
+
+    private function getHourLineChart(&$data=array())
+    {
+        $codeHTML = '<script>
+        new Chart(document.getElementById(\'' . $this->_currentChartOptions['canvasId'] . '\').getContext(\'2d\'), {
+            type: "line",
+            data: {
+                labels: ["00H00","01H00","02H00","03H00","04H00","05H00","06H00","07H00","08H00","09H00","10H00","11H00","12H00","13H00","14H00","15H00","16H00","17H00","18H00","19H00","20H00","21H00","22H00","23H00",],
+                datasets: [{
+                    data: [';
+
+        foreach ($this->getHourRepartition($data) as $hour=>$qty)
+        {
+            $codeHTML .= $qty . ',';
+        }
+
+
+        $codeHTML .= '],
+                    label: "' . $this->_currentChartOptions['label'] . '",
+                    borderColor: "' . $this->_currentChartOptions['color'] . '",
+                    fill: ' . $this->_currentChartOptions['fill'] . '
+                    },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "' . $this->_currentChartOptions['title'] . '"
+    }
+  }
+});
+    </script>';
+
+        return $codeHTML;
+    }
+
+
+
+
+
+    /*
+    public function getHoursLineChart($height='', $width='', $class='', $idCanevas='', $idDiv='', $title='' )
+    {
+        if($idCanevas=='')
+        {
+            $idCanevas = $this->generateRandomString();
+        }
+        if ($height=='')
+        {
+            $height = 400;
+        }
+        if ($width=='')
+        {
+            $width = 600;
+        }
+        $browserData = array();
+        foreach ($this->data as $datum)
+        {
+            if(!key_exists($datum['deviceName'], $browserData))
+            {
+                $browserData[$datum['deviceName']]=1;
+            }
+            else
+            {
+                $browserData[$datum['deviceName']]++;
+            }
+        }
+        $hoursData = array(
+            '00'=>0,
+            '01'=>0,
+            '02'=>0,
+            '03'=>0,
+            '04'=>0,
+            '05'=>0,
+            '06'=>0,
+            '07'=>0,
+            '08'=>0,
+            '09'=>0,
+            '10'=>0,
+            '11'=>0,
+            '12'=>0,
+            '13'=>0,
+            '14'=>0,
+            '15'=>0,
+            '16'=>0,
+            '17'=>0,
+            '18'=>0,
+            '19'=>0,
+            '20'=>0,
+            '21'=>0,
+            '22'=>0,
+            '23'=>0,
+        );
+        foreach ($this->data as $datum)
+        {
+            $hour = explode(':', $datum['time'])[0];
+            if(key_exists($hour, $hoursData))
+            {
+                $hoursData[$hour]++;
+            }
+        }
+
+        $codeHTML = '
+    <div id="' . $idDiv . '" class="' . $class . '" style="width: ' . $width . 'px; height: ' . $height . 'px;">
+        <canvas id="' . $idCanevas . '" style="position: relative;"></canvas>
+    </div>
+    <script>
+        new Chart(document.getElementById("' . $idCanevas . '"), {
+            type: "line",
+            data: {
+                labels: ["", "00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00",],
+                datasets: [{
+                    data: [';
+
+        foreach ($hoursData as $hour=>$qty)
+        {
+            $codeHTML .= $qty . ',';
+        }
+
+
+        $codeHTML .= '],
+                    label: "Affluence",
+                    borderColor: "#3e95cd",
+                    fill: true
+                    },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "' . $title . '"
+    }
+  }
+});
+
+
+    </script>
+    ';
+        return $codeHTML;
+    }
+
+
 
 
 
@@ -373,105 +585,7 @@ class Results
     }
 
 
-    public function getHoursLineChart($height='', $width='', $class='', $idCanevas='', $idDiv='', $title='' )
-    {
-        if($idCanevas=='')
-        {
-            $idCanevas = $this->generateRandomString();
-        }
-        if ($height=='')
-        {
-            $height = 400;
-        }
-        if ($width=='')
-        {
-            $width = 600;
-        }
-        $browserData = array();
-        foreach ($this->data as $datum)
-        {
-            if(!key_exists($datum['deviceName'], $browserData))
-            {
-                $browserData[$datum['deviceName']]=1;
-            }
-            else
-            {
-                $browserData[$datum['deviceName']]++;
-            }
-        }
-        $hoursData = array(
-            '00'=>0,
-            '01'=>0,
-            '02'=>0,
-            '03'=>0,
-            '04'=>0,
-            '05'=>0,
-            '06'=>0,
-            '07'=>0,
-            '08'=>0,
-            '09'=>0,
-            '10'=>0,
-            '11'=>0,
-            '12'=>0,
-            '13'=>0,
-            '14'=>0,
-            '15'=>0,
-            '16'=>0,
-            '17'=>0,
-            '18'=>0,
-            '19'=>0,
-            '20'=>0,
-            '21'=>0,
-            '22'=>0,
-            '23'=>0,
-        );
-        foreach ($this->data as $datum)
-        {
-            $hour = explode(':', $datum['time'])[0];
-            if(key_exists($hour, $hoursData))
-            {
-                $hoursData[$hour]++;
-            }
-        }
 
-        $codeHTML = '
-    <div id="' . $idDiv . '" class="' . $class . '" style="width: ' . $width . 'px; height: ' . $height . 'px;">
-        <canvas id="' . $idCanevas . '" style="position: relative;"></canvas>
-    </div>
-    <script>
-        new Chart(document.getElementById("' . $idCanevas . '"), {
-            type: "line",
-            data: {
-                labels: ["", "00:00","01:00","02:00","03:00","04:00","05:00","06:00","07:00","08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00","23:00",],
-                datasets: [{
-                    data: [';
-
-        foreach ($hoursData as $hour=>$qty)
-        {
-            $codeHTML .= $qty . ',';
-        }
-
-
-        $codeHTML .= '],
-                    label: "Affluence",
-                    borderColor: "#3e95cd",
-                    fill: true
-                    },
-    ]
-  },
-  options: {
-    title: {
-      display: true,
-      text: "' . $title . '"
-    }
-  }
-});
-
-
-    </script>
-    ';
-        return $codeHTML;
-    }
 
     public function getDaysLineChart($height='', $width='', $class='', $idCanevas='', $idDiv='', $title='' )
     {
@@ -1722,65 +1836,6 @@ mymap.addLayer(markers);
 
 
     /**
-     * Generate a random string (useful in order to get unique HTML ids for charts)
-     * @see https://stackoverflow.com/questions/4356289/php-random-string-generator
-     * @param int $length Optionnal, the length of the desired random string. If inexplicit, it will be set to 10.
-     * @return string The random string generated.
-     *//*
-    private function generateRandomString($length = 10)
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $randomString;
-    }
-
-    /**
-     * Returns an array of flat colors in hexadecimal values.
-     * @param int $nbColor The number of desired colors.
-     * @return array The array of flat colors in hexadecimal values.
-     *//*
-    private function getRandomColors($nbColor =1)
-    {
-        $proposedColors = [
-            ["#3e95cd","#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
-            ["#1F518B","#1488C8","#F7E041","#E2413E","#E91222"],
-            ["#F7A61B","#7CBF42","#EB4A24","#34A8C8","#30A443"],
-            ["#FE6EDA","#7CB0C3","#5BADAF","#96CEB4","#FFCC5C"],
-            ["#FF6B57","#FF884D","#32526E","#81B9C3","#41C3AC"],
-            ["#3FC380","#89C4F4","#E08283","#B388DD","#FEC956"],
-            ["#3498DB","#E67E22","#D35400","#E74C3C","#1ABC9C"],
-            ["#302B2D","#1F8D85","#22409A","#FBCD36","#F26C68"],
-            ["#F77D74","#B00843","#CFBA7A","#56C8BE","#4A5269"],
-            ["#FFC312","#C4E538","#12CBC4","#FDA7DF","#ED4C67"],
-            ["#F79F1F","#A3CB38","#1289A7","#D980FA","#B53471"],
-            ["#EE5A24","#009432","#0652DD","#9980FA","#833471"],
-            ["#EA2027","#006266","#1B1464","#5758BB","#6F1E51"],
-            ];
-        $colorsSelected = [];
-        while (count($colorsSelected) < $nbColor)
-        {
-            if( count($colorsSelected)+5 <= $nbColor )
-            {
-                $selectedColorLine = rand(0,count($proposedColors)-1);
-                $colorsSelected = array_merge($colorsSelected, $proposedColors[$selectedColorLine]);
-                unset($proposedColors[$selectedColorLine]);
-                $proposedColors=array_values($proposedColors);
-            }
-            else
-            {
-                $numberOfLackingColors = $nbColor-count($colorsSelected);
-                $selectedColorLine = rand(0,count($proposedColors)-1);
-                $colorsSelected = array_merge($colorsSelected, array_slice($proposedColors[$selectedColorLine], 0, $numberOfLackingColors) );
-            }
-        }
-        return $colorsSelected;
-    }
-
-    /**
      * Generator reading the file (this one could be huge, generators became mandatory)
      * @param string $pathToFile The path to the file to open and iterate to.
      * @return Generator Generator iterating upon the lines.
@@ -1885,4 +1940,175 @@ mymap.addLayer(markers);
             }
         }
     }*/
+
+    /*******************************************************************************************************************
+     *                                                      MISC
+     ******************************************************************************************************************/
+
+    private function manageOptions(&$options=array())
+    {
+        $this->_currentChartOptions = array(
+            'canvasId'=>$this->generateRandomString(20),
+            'color'=>$this->pickRandomColors(1)[0],
+            'divContainingCanvasId'=>$this->generateRandomString(20),
+            'fill'=>'true',
+            'height'=>'400px',
+            'label'=>'',
+            'title'=>'',
+            'width'=>'400px',
+        );
+
+        foreach ($options as $optionName=>$optionValue) {
+            switch ($optionName) {
+                case 'canvasId':
+                    $this->_currentChartOptions['canvasId'] = $optionValue;
+                    break;
+                case 'color':
+                    $this->_currentChartOptions['color'] = $optionValue;
+                    break;
+                case 'divContainingCanvasId':
+                    $this->_currentChartOptions['divContainingCanvasId'] = $optionValue;
+                    break;
+                case 'fill':
+                    if($optionValue=='true' || $optionValue=='false') {
+                        $this->_currentChartOptions['fill'] = $optionValue;
+                    }
+                    break;
+                case 'height':
+                    $this->_currentChartOptions['height'] = $optionValue;
+                    break;
+                case 'label':
+                    $this->_currentChartOptions['label'] = $optionValue;
+                    break;
+                case 'title':
+                    $this->_currentChartOptions['title'] = $optionValue;
+                    break;
+                case 'width':
+                    $this->_currentChartOptions['width'] = $optionValue;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+
+
+    /**
+     * Generate a random string (useful in order to get unique HTML ids for charts)
+     * @see https://stackoverflow.com/questions/4356289/php-random-string-generator
+     * @param int $length Optionnal, the length of the desired random string. If inexplicit, it will be set to 10.
+     * @return string The random string generated.
+     */
+    private function generateRandomString($length = 10)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+
+
+
+    /**
+     * Returns an array of flat colors in hexadecimal values.
+     * @param int $nbColor The number of desired colors.
+     * @return array The array of flat colors in hexadecimal values.
+     */
+    private function pickRandomColors($nbColor =1)
+    {
+        $proposedColors = [
+            ["#3e95cd","#8e5ea2","#3cba9f","#e8c3b9","#c45850"],
+            ["#1F518B","#1488C8","#F7E041","#E2413E","#E91222"],
+            ["#F7A61B","#7CBF42","#EB4A24","#34A8C8","#30A443"],
+            ["#FE6EDA","#7CB0C3","#5BADAF","#96CEB4","#FFCC5C"],
+            ["#FF6B57","#FF884D","#32526E","#81B9C3","#41C3AC"],
+            ["#3FC380","#89C4F4","#E08283","#B388DD","#FEC956"],
+            ["#3498DB","#E67E22","#D35400","#E74C3C","#1ABC9C"],
+            ["#302B2D","#1F8D85","#22409A","#FBCD36","#F26C68"],
+            ["#F77D74","#B00843","#CFBA7A","#56C8BE","#4A5269"],
+            ["#FFC312","#C4E538","#12CBC4","#FDA7DF","#ED4C67"],
+            ["#F79F1F","#A3CB38","#1289A7","#D980FA","#B53471"],
+            ["#EE5A24","#009432","#0652DD","#9980FA","#833471"],
+            ["#EA2027","#006266","#1B1464","#5758BB","#6F1E51"],
+            ];
+        $colorsSelected = [];
+        while (count($colorsSelected) < $nbColor)
+        {
+            if( count($colorsSelected)+5 <= $nbColor )
+            {
+                $selectedColorLine = rand(0,count($proposedColors)-1);
+                $colorsSelected = array_merge($colorsSelected, $proposedColors[$selectedColorLine]);
+                unset($proposedColors[$selectedColorLine]);
+                $proposedColors=array_values($proposedColors);
+            }
+            else
+            {
+                $numberOfLackingColors = $nbColor-count($colorsSelected);
+                $selectedColorLine = rand(0,count($proposedColors)-1);
+                $colorsSelected = array_merge($colorsSelected, array_slice($proposedColors[$selectedColorLine], 0, $numberOfLackingColors) );
+            }
+        }
+        return $colorsSelected;
+    }
+
+
+    private function getHourRepartition(&$data)
+    {
+        $hoursData = array(
+            '00'=>0,
+            '01'=>0,
+            '02'=>0,
+            '03'=>0,
+            '04'=>0,
+            '05'=>0,
+            '06'=>0,
+            '07'=>0,
+            '08'=>0,
+            '09'=>0,
+            '10'=>0,
+            '11'=>0,
+            '12'=>0,
+            '13'=>0,
+            '14'=>0,
+            '15'=>0,
+            '16'=>0,
+            '17'=>0,
+            '18'=>0,
+            '19'=>0,
+            '20'=>0,
+            '21'=>0,
+            '22'=>0,
+            '23'=>0,
+        );
+        foreach ($data['hour'] as $datum)
+        {
+            $hour = explode(':', $datum)[0];
+            if(key_exists($hour, $hoursData))
+            {
+                $hoursData[$hour]++;
+            }
+        }
+        return $hoursData;
+    }
+
+
+
+
+    /*******************************************************************************************************************
+     *                                                      GETTERS
+     ******************************************************************************************************************/
+
+
+    /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->_data;
+    }
 }
