@@ -32,6 +32,7 @@ class Results
         'country',
         'hour',
         'mobile',
+        'navigation',
         'system',
     );
 
@@ -90,6 +91,18 @@ class Results
                         case 'mobile':
                             array_push($this->_data['mobile'], $csvLine[16]);
                             break;
+                        case 'navigation':
+                            $prefixes = array('http://', 'https://', 'http://www.', 'https://www.', 'www.');
+                            $comingFrom = str_replace($prefixes, '', trim($csvLine[6]));
+                            while(mb_substr($comingFrom, -1)=='/') {
+                                $comingFrom = rtrim($comingFrom, '/');
+                            }
+                            $currentURL = str_replace($prefixes, '', trim($csvLine[5]));
+                            while(mb_substr($currentURL, -1)=='/') {
+                                $currentURL = rtrim($currentURL, '/');
+                            }
+                            array_push($this->_data['navigation'], array($comingFrom, $currentURL));
+                            break;
                         case 'system':
                             array_push($this->_data['system'], $csvLine[17]);
                             break;
@@ -129,6 +142,9 @@ class Results
                 break;
             case 'mobile':
                 return $codeHTML . $this->manageMobiles($typeChart, $data);
+                break;
+            case 'navigation':
+                return $codeHTML . $this->manageNavigation($data);
                 break;
             case 'system':
                 return $codeHTML . $this->manageSystems($typeChart, $data);
@@ -479,6 +495,132 @@ class Results
 
 
     /*******************************************************************************************************************
+     *                                              USERS - NAVIGATION
+     ******************************************************************************************************************/
+
+    private function manageNavigation(&$data=array())
+    {
+        return $this->getGrapheParcours($data);
+    }
+
+
+
+
+    private function getGrapheParcours($data=array())
+    {
+        // TODO add ignored urls
+        // First, let's order data in a proper way.
+        $nodes = array();
+        $edges = array();
+
+        foreach ($data['navigation'] as $datum)
+        {
+            if( trim($datum['0'])!='' )
+            {
+                if( !array_key_exists(trim($datum['0']), $nodes ) )
+                {
+
+                    $nodes[trim($datum['0'])]=1;
+                }
+                else
+                {
+                    $nodes[trim($datum['0'])]++;
+                }
+            }
+            if( trim($datum['1'])!='' )
+            {
+                if( !array_key_exists(trim($datum['1']), $nodes ) )
+                {
+
+                    $nodes[trim($datum['1'])]=1;
+                }
+                else
+                {
+                    $nodes[trim($datum['1'])]++;
+                }
+            }
+        }
+
+        foreach ($data['navigation'] as $datum)
+        {
+            if( trim($datum['1'])!='' && trim($datum['0'])!='' )
+            {
+                // The edges array follows this pattern : ( origin=>([destination=> nbOccurency],...), ...)
+                if (isset($edges[trim($datum['0'])] ))
+                {
+                    if( isset( $edges[trim($datum['0'])] [trim($datum['1'])] ) )
+                    {
+                        $edges[trim($datum['0'])] [trim($datum['1'])]++;
+                    }
+                    else
+                    {
+                        $edges[trim($datum['0'])] [trim($datum['1'])]=1;
+                    }
+                }
+                else
+                {
+                    $edges[trim($datum['0'])]=array();
+                    if( isset( $edges[trim($datum['0'])] [trim($datum['1'])] ) )
+                    {
+                        $edges[trim($datum['0'])] [trim($datum['1'])]++;
+                    }
+                    else
+                    {
+                        $edges[trim($datum['0'])] [trim($datum['1'])]=1;
+                    }
+                }
+            }
+        }
+        $codeHTML = '
+        <div id="' . $this->_currentChartOptions['divContainingCanvasId'] . '"></div>
+        
+        <script type="text/javascript">
+            // create an array with nodes
+          var nodes = new vis.DataSet([';
+
+        $count = 1;
+        $labelToId = array();
+
+        foreach ($nodes as $node=>$value)
+        {
+            $codeHTML .= '
+            {id: ' . $count . ', label: \'' . $node . '\'},';
+            $labelToId[$node]=$count;
+            $count++;
+        }
+
+        $codeHTML .= '
+          ]);
+        
+          // create an array with edges
+          var edges = new vis.DataSet([
+          ';
+
+        foreach ($edges as $originEdge=>$destinations)
+        {
+            foreach ($destinations as $destination=>$quantity)
+            {
+                $codeHTML .= '
+            {from: ' . $labelToId[$originEdge] . ', to: ' . $labelToId[$destination] . ', value: ' . $quantity . ', arrows:\'to\', dashes:true},';
+            }
+        }
+
+        $codeHTML .= '
+          ]);
+        
+          // create a network
+          var container = document.getElementById("' . $this->_currentChartOptions['divContainingCanvasId'] . '");
+          var data = {
+            nodes: nodes,
+            edges: edges
+          };
+          var options = {};
+          var network = new vis.Network(container, data, options);
+        </script>';
+        return $codeHTML;
+    }
+
+    /*******************************************************************************************************************
      *                                              USERS - SYSTEM
      ******************************************************************************************************************/
 
@@ -543,322 +685,7 @@ class Results
 
 
 
-
-
-
-
-
-    /*
-        /**
-         * Results constructor.
-         *//*
-    public function __construct()
-    {
-        $this->orderData();
-    }
-
-    /**
-     * Returns the date and the hour of the first occurence in the date.
-     * @return array An array looking like (YYYY-MM-DD, HH:MM:SS).
-     *//*
-    public function getTimeFirstOccurence()
-    {
-        return array($this->data[0]['date'], $this->data[0]['time']);
-    }
-
-    /**
-     * Return the count of all entries in the data.
-     * @return int The count of all entries in the data.
-     *//*
-    public function getEntriesCount()
-    {
-        return count($this->data);
-    }
-
-
-    public function getCurrentVisitorData($ip='', $title='', $language='fr', $tableClasses='', $tableId='')
-    {
-        $translations = [
-            'fr'=>[
-                'ip'=>'Adresse IP',
-                'country'=>'Pays',
-                'countryTag'=>'Code pays',
-                'city'=>'Ville',
-                'continentTag'=>'Code continent',
-                'latitude'=>'Latitude',
-                'longitude'=>'Longitude',
-                'organization'=>'Organisation',
-                'urlVisited'=>'Page vue',
-                'comingfFromUrl'=>'Venant de',
-                'date'=>'Date',
-                'time'=>'Heure',
-                'displayEngine'=>'Moteur de rendu',
-                'agentType'=>'Type de logiciel',
-                'agentName'=>'Nom du logiciel',
-                'agentVersion'=>'Version du logiciel',
-                'OSName'=>'Système d\'exploitation',
-                'OSVersionNumber'=>'Version du système',
-                'OSPlateForme'=>'Plateforme',
-                'deviceName'=>'Matériel',
-                'brand'=>'Marque',
-                'modele'=>'Modèle',
-                ],
-
-            'en'=>[
-                'ip'=>'IP',
-                'country'=>'Country',
-                'countryTag'=>'Country Tag',
-                'city'=>'City',
-                'continentTag'=>'Continent tag',
-                'latitude'=>'Latitude',
-                'longitude'=>'Longitude',
-                'organization'=>'Organization',
-                'urlVisited'=>'URL visited',
-                'comingfFromUrl'=>'Coming from URL',
-                'date'=>'Date',
-                'time'=>'Time',
-                'displayEngine'=>'Display engine',
-                'agentType'=>'Agent type',
-                'agentName'=>'Agent Name',
-                'agentVersion'=>'Agent version',
-                'OSName'=>'OS name',
-                'OSVersionNumber'=>'OS version number',
-                'OSPlateForme'=>'OS plateforme',
-                'deviceName'=>'Device name',
-                'brand'=>'Brand',
-                'modele'=>'Modele',
-            ]];
-        if($tableId=='')
-        {
-            $tableId= $this->generateRandomString(10);
-        }
-        $count = count($this->data)-1;
-        $currentIP='127.0.0.1';
-        if($ip=='')
-        {
-            $currentIP = isset($_SERVER['HTTP_CLIENT_IP'])?$_SERVER['HTTP_CLIENT_IP']:isset($_SERVER['HTTP_X_FORWARDED_FOR'])?$_SERVER['HTTP_X_FORWARDED_FOR']:$_SERVER['REMOTE_ADDR'];
-        }
-        $currentIPData = array();
-        while($count>=0)
-        {
-            if($this->data[$count]['ip']==$currentIP)
-            {
-                $currentIPData =$this->data[$count];
-                break;
-            }
-            $count--;
-        }
-        return '
-        <div>
-            <table class="' . $tableClasses . '" id="' . $tableId . '">
-                <caption>' . $title . '</caption>
-                <tr>
-                    <th>' . $translations[$language]['ip'] . '</th>
-                    <td>' . $currentIPData['ip'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['country'] . '</th>
-                    <td>' . $currentIPData['country'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['countryTag'] . '</th>
-                    <td>' . $currentIPData['countryTag'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['city'] . '</th>
-                    <td>' . $currentIPData['city'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['continentTag'] . '</th>
-                    <td>' . $currentIPData['continentTag'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['latitude'] . '</th>
-                    <td>' . $currentIPData['latitude'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['longitude'] . '</th>
-                    <td>' . $currentIPData['longitude'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['organization'] . '</th>
-                    <td>' . $currentIPData['organization'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['urlVisited'] . '</th>
-                    <td>' . $currentIPData['urlVisited'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['comingfFromUrl'] . '</th>
-                    <td>' . $currentIPData['comingfFromUrl'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['date'] . '</th>
-                    <td>' . $currentIPData['date'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['time'] . '</th>
-                    <td>' . $currentIPData['time'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['displayEngine'] . '</th>
-                    <td>' . $currentIPData['displayEngine'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['agentType'] . '</th>
-                    <td>' . $currentIPData['agentType'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['agentName'] . '</th>
-                    <td>' . $currentIPData['agentName'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['agentVersion'] . '</th>
-                    <td>' . $currentIPData['agentVersion'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['OSName'] . '</th>
-                    <td>' . $currentIPData['OSName'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['OSVersionNumber'] . '</th>
-                    <td>' . $currentIPData['OSVersionNumber'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['OSPlateForme'] . '</th>
-                    <td>' . $currentIPData['OSPlateForme'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['deviceName'] . '</th>
-                    <td>' . $currentIPData['deviceName'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['brand'] . '</th>
-                    <td>' . $currentIPData['brand'] . '</td>
-                </tr>
-                <tr>
-                    <th>' . $translations[$language]['modele'] . '</th>
-                    <td>' . $currentIPData['modele'] . '</td>
-                </tr>
-            </table>
-        </div>';
-    }
-
-
-    public function getGrapheParcours()
-    {
-        // TODO COLORER NŒUDS (INTERNES ET EXTERNES AU SITE) ET ESPACER NŒUDS
-        // First, let's order data in a proper way.
-        $nodes = array();
-        $edges = array();
-
-        foreach ($this->data as $datum)
-        {
-            if( trim($datum['urlVisited'])!='' )
-            {
-                if( !array_key_exists(trim($datum['urlVisited']), $nodes ) )
-                {
-
-                    $nodes[trim($datum['urlVisited'])]=1;
-                }
-                else
-                {
-                    $nodes[trim($datum['urlVisited'])]++;
-                }
-            }
-            if( trim($datum['comingfFromUrl'])!='' )
-            {
-                if( !array_key_exists(trim($datum['comingfFromUrl']), $nodes ) )
-                {
-
-                    $nodes[trim($datum['comingfFromUrl'])]=1;
-                }
-                else
-                {
-                    $nodes[trim($datum['comingfFromUrl'])]++;
-                }
-            }
-        }
-
-        foreach ($this->data as $datum)
-        {
-            if( trim($datum['urlVisited'])!='' && trim($datum['comingfFromUrl'])!='' )
-            {
-                // The edges array follows this pattern : ( origin=>([destination=> nbOccurency],...), ...)
-                if (isset($edges[trim($datum['comingfFromUrl'])] ))
-                {
-                    if( isset( $edges[trim($datum['comingfFromUrl'])] [trim($datum['urlVisited'])] ) )
-                    {
-                        $edges[trim($datum['comingfFromUrl'])] [trim($datum['urlVisited'])]++;
-                    }
-                    else
-                    {
-                        $edges[trim($datum['comingfFromUrl'])] [trim($datum['urlVisited'])]=1;
-                    }
-                }
-                else
-                {
-                    $edges[trim($datum['comingfFromUrl'])]=array();
-                    if( isset( $edges[trim($datum['comingfFromUrl'])] [trim($datum['urlVisited'])] ) )
-                    {
-                        $edges[trim($datum['comingfFromUrl'])] [trim($datum['urlVisited'])]++;
-                    }
-                    else
-                    {
-                        $edges[trim($datum['comingfFromUrl'])] [trim($datum['urlVisited'])]=1;
-                    }
-                }
-            }
-        }
-            $codeHTML = '
-        <div id="mynetwork"></div>
-        
-        <script type="text/javascript">
-            // create an array with nodes
-          var nodes = new vis.DataSet([';
-
-        $count = 1;
-        $labelToId = array();
-
-        foreach ($nodes as $node=>$value)
-        {
-            $codeHTML .= '
-            {id: ' . $count . ', label: \'' . $node . '\'},';
-            $labelToId[$node]=$count;
-            $count++;
-        }
-
-            $codeHTML .= '
-          ]);
-        
-          // create an array with edges
-          var edges = new vis.DataSet([
-          ';
-
-        foreach ($edges as $originEdge=>$destinations)
-        {
-            foreach ($destinations as $destination=>$quantity)
-            {
-                $codeHTML .= '
-            {from: ' . $labelToId[$originEdge] . ', to: ' . $labelToId[$destination] . ', value: ' . $quantity . ', arrows:\'to\', dashes:true},';
-            }
-        }
-
-        $codeHTML .= '
-          ]);
-        
-          // create a network
-          var container = document.getElementById(\'mynetwork\');
-          var data = {
-            nodes: nodes,
-            edges: edges
-          };
-          var options = {};
-          var network = new vis.Network(container, data, options);
-        </script>';
-        return $codeHTML;
-    }
-
+/*
 
 
 

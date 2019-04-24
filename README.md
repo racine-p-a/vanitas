@@ -18,7 +18,7 @@ that you would eventually read and parse quite easily.
 - Fast. So fast ! For each visitor coming on each of your page, their metrics are
 detected and stored in a blink (less than 0.10 sec)
 - Compatible with PHP 5 and PHP 7 and all their updates. Do not worry about that. :)
-- Works with IPV4 and IPV6 although IPV6 is way less intrinsically accurate.
+- Works with IPV4 and IPV6 although IPV6 is intrinsically way less accurate.
 
 ## Why not choose Vanitas
 
