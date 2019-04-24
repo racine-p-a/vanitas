@@ -27,8 +27,12 @@ class Results
 
 
     private $_authorizedSetsOfData = array(
-        'date',
+        'bot',
+        'browser',
+        'country',
         'hour',
+        'mobile',
+        'system',
     );
 
 
@@ -71,11 +75,23 @@ class Results
 
                 foreach ($this->_data as $idArray=>$valueArray) {
                     switch ($idArray) {
-                        case 'date':
-                            array_push($this->_data['date'], $csvLine[0]);
+                        case 'bot':
+                            array_push($this->_data['bot'], $csvLine[11]);
+                            break;
+                        case 'browser':
+                            array_push($this->_data['browser'], $csvLine[12]);
+                            break;
+                        case 'country':
+                            array_push($this->_data['country'], $csvLine[7]);
                             break;
                         case 'hour':
                             array_push($this->_data['hour'], $csvLine[1]);
+                            break;
+                        case 'mobile':
+                            array_push($this->_data['mobile'], $csvLine[16]);
+                            break;
+                        case 'system':
+                            array_push($this->_data['system'], $csvLine[17]);
                             break;
                         default:
                             break;
@@ -91,15 +107,31 @@ class Results
             throw new Exception('Unknown type of data asked : ' . $dataName . ' .');
         }
 
+        // On vérifie précieusement et stocke les options.
         $this->manageOptions($options);
-        $codeHTML = '<div id="' . $this->_currentChartOptions['divContainingCanvasId'] . '" class="" style="width:' . $this->_currentChartOptions['width'] . '; height:' . $this->_currentChartOptions['height'] . ';">
+
+
+        $codeHTML = '<div id="' . $this->_currentChartOptions['divContainingCanvasId'] . '" class="' . $this->_currentChartOptions['divContainingCanvasClass'] . '" style="width:' . $this->_currentChartOptions['width'] . '; height:' . $this->_currentChartOptions['height'] . ';">
         <canvas id="' . $this->_currentChartOptions['canvasId'] . '" style="position: relative;"></canvas>
     </div>';
         switch ($dataName) {
-            case 'date':
+            case 'bot':
+                return $codeHTML . $this->manageBots($typeChart, $data);
+                break;
+            case 'browser':
+                return $codeHTML . $this->manageBrowsers($typeChart, $data);
+                break;
+            case 'country':
+                return $codeHTML . $this->manageCountries($typeChart, $data);
                 break;
             case 'hour':
                 return $codeHTML . $this->manageHours($typeChart, $data);
+                break;
+            case 'mobile':
+                return $codeHTML . $this->manageMobiles($typeChart, $data);
+                break;
+            case 'system':
+                return $codeHTML . $this->manageSystems($typeChart, $data);
                 break;
             default:
                 throw new Exception('Not yet implemented.');
@@ -110,9 +142,72 @@ class Results
     }
 
     /*******************************************************************************************************************
-     *                                                      HOURS
+     *                                              GEOGRAPHY - COUNTRIES
      ******************************************************************************************************************/
 
+
+    private function manageCountries($typeChart='', &$data=array())
+    {
+        if($typeChart=='piechart') {
+            return $this->getCountryPieChart($data, 'pie');
+        } else {
+            return $this->getCountryPieChart($data, $typeChart);
+        }
+    }
+
+
+    private function getCountryPieChart(&$data=array(), $typeChart='pie')
+    {
+        $countries = $this->getCountryRepartition($data);
+        $codeHTML = '<script>
+        new Chart(document.getElementById(\'' . $this->_currentChartOptions['canvasId'] . '\').getContext(\'2d\'), {
+            type: "' . $typeChart . '",
+            data: {
+                labels: [';
+        foreach ($countries as $country=>$quantity) {
+            $codeHTML .= '"' . $country . '", ';
+        }
+        $codeHTML .='],
+                datasets: [{
+                    data: [';
+
+        foreach ($countries as $country=>$quantity)
+        {
+            $codeHTML .= $quantity . ',';
+        }
+
+        $codeHTML .= '],
+                    label: "' . $this->_currentChartOptions['label'] . '",
+                    backgroundColor: [';
+
+        if( count($countries) > count($this->_currentChartOptions['colors']) ) {
+            $this->_currentChartOptions['colors'] = array_merge($this->_currentChartOptions['colors'], $this->pickRandomColors(count($countries) - count($this->_currentChartOptions['colors'])));
+        }
+
+         $codeHTML .= $this->arrayColorToString($this->_currentChartOptions['colors']) . ', ';
+
+        $codeHTML .= ']
+                    },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "' . $this->_currentChartOptions['title'] . '"
+    }
+  }
+});
+    </script>';
+
+        return $codeHTML;
+    }
+
+
+
+
+    /*******************************************************************************************************************
+     *                                          TEMPORALITY - HOURS
+     ******************************************************************************************************************/
 
     private function manageHours($typeChart='', &$data=array())
     {
@@ -195,6 +290,262 @@ class Results
 
         return $codeHTML;
     }
+
+
+
+
+    /*******************************************************************************************************************
+     *                                              USERS - BOT
+     ******************************************************************************************************************/
+
+    private function manageBots($typeChart='', &$data=array())
+    {
+        if($typeChart=='piechart') {
+            return $this->getBotPieChart($data, 'pie');
+        } else {
+            return $this->getBotPieChart($data, $typeChart);
+        }
+    }
+
+
+    private function getBotPieChart(&$data=array(), $typeChart='pie')
+    {
+        $bots = $this->getBotRepartition($data);
+        $codeHTML = '<script>
+        new Chart(document.getElementById(\'' . $this->_currentChartOptions['canvasId'] . '\').getContext(\'2d\'), {
+            type: "' . $typeChart . '",
+            data: {
+                labels: [';
+        foreach ($bots as $bot=>$quantity) {
+            $codeHTML .= '"' . $bot . '", ';
+        }
+        $codeHTML .='],
+                datasets: [{
+                    data: [';
+
+        foreach ($bots as $bot=>$quantity)
+        {
+            $codeHTML .= $quantity . ',';
+        }
+
+        $codeHTML .= '],
+                    label: "' . $this->_currentChartOptions['label'] . '",
+                    backgroundColor: [';
+
+        if( count($bots) > count($this->_currentChartOptions['colors']) ) {
+            $this->_currentChartOptions['colors'] = array_merge($this->_currentChartOptions['colors'], $this->pickRandomColors(count($bots) - count($this->_currentChartOptions['colors'])));
+        }
+
+        $codeHTML .= $this->arrayColorToString($this->_currentChartOptions['colors']) . ', ';
+
+        $codeHTML .= ']
+                    },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "' . $this->_currentChartOptions['title'] . '"
+    }
+  }
+});
+    </script>';
+
+        return $codeHTML;
+    }
+
+
+    /*******************************************************************************************************************
+     *                                              USERS - BROWSER
+     ******************************************************************************************************************/
+
+    private function manageBrowsers($typeChart='', &$data=array())
+    {
+        if($typeChart=='piechart') {
+            return $this->getBrowserPieChart($data, 'pie');
+        } else {
+            return $this->getBrowserPieChart($data, $typeChart);
+        }
+    }
+
+
+    private function getBrowserPieChart(&$data=array(), $typeChart='pie')
+    {
+        $bots = $this->getBrowserRepartition($data);
+        $codeHTML = '<script>
+        new Chart(document.getElementById(\'' . $this->_currentChartOptions['canvasId'] . '\').getContext(\'2d\'), {
+            type: "' . $typeChart . '",
+            data: {
+                labels: [';
+        foreach ($bots as $bot=>$quantity) {
+            $codeHTML .= '"' . $bot . '", ';
+        }
+        $codeHTML .='],
+                datasets: [{
+                    data: [';
+
+        foreach ($bots as $bot=>$quantity)
+        {
+            $codeHTML .= $quantity . ',';
+        }
+
+        $codeHTML .= '],
+                    label: "' . $this->_currentChartOptions['label'] . '",
+                    backgroundColor: [';
+
+        if( count($bots) > count($this->_currentChartOptions['colors']) ) {
+            $this->_currentChartOptions['colors'] = array_merge($this->_currentChartOptions['colors'], $this->pickRandomColors(count($bots) - count($this->_currentChartOptions['colors'])));
+        }
+
+        $codeHTML .= $this->arrayColorToString($this->_currentChartOptions['colors']) . ', ';
+
+        $codeHTML .= ']
+                    },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "' . $this->_currentChartOptions['title'] . '"
+    }
+  }
+});
+    </script>';
+
+        return $codeHTML;
+    }
+
+
+
+    /*******************************************************************************************************************
+     *                                              USERS - MOBILE
+     ******************************************************************************************************************/
+
+    private function manageMobiles($typeChart='', &$data=array())
+    {
+        if($typeChart=='piechart') {
+            return $this->getMobilePieChart($data, 'pie');
+        } else {
+            return $this->getMobilePieChart($data, $typeChart);
+        }
+    }
+
+
+    private function getMobilePieChart(&$data=array(), $typeChart='pie')
+    {
+        $bots = $this->getMobileRepartition($data);
+        $codeHTML = '<script>
+        new Chart(document.getElementById(\'' . $this->_currentChartOptions['canvasId'] . '\').getContext(\'2d\'), {
+            type: "' . $typeChart . '",
+            data: {
+                labels: [';
+        foreach ($bots as $bot=>$quantity) {
+            $codeHTML .= '"' . $bot . '", ';
+        }
+        $codeHTML .='],
+                datasets: [{
+                    data: [';
+
+        foreach ($bots as $bot=>$quantity)
+        {
+            $codeHTML .= $quantity . ',';
+        }
+
+        $codeHTML .= '],
+                    label: "' . $this->_currentChartOptions['label'] . '",
+                    backgroundColor: [';
+
+        if( count($bots) > count($this->_currentChartOptions['colors']) ) {
+            $this->_currentChartOptions['colors'] = array_merge($this->_currentChartOptions['colors'], $this->pickRandomColors(count($bots) - count($this->_currentChartOptions['colors'])));
+        }
+
+        $codeHTML .= $this->arrayColorToString($this->_currentChartOptions['colors']) . ', ';
+
+        $codeHTML .= ']
+                    },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "' . $this->_currentChartOptions['title'] . '"
+    }
+  }
+});
+    </script>';
+
+        return $codeHTML;
+    }
+
+
+    /*******************************************************************************************************************
+     *                                              USERS - SYSTEM
+     ******************************************************************************************************************/
+
+    private function manageSystems($typeChart='', &$data=array())
+    {
+        if($typeChart=='piechart') {
+            return $this->getSystemPieChart($data, 'pie');
+        } else {
+            return $this->getSystemPieChart($data, $typeChart);
+        }
+    }
+
+
+    private function getSystemPieChart(&$data=array(), $typeChart='pie')
+    {
+        $systems = $this->getSystemRepartition($data);
+        $codeHTML = '<script>
+        new Chart(document.getElementById(\'' . $this->_currentChartOptions['canvasId'] . '\').getContext(\'2d\'), {
+            type: "' . $typeChart . '",
+            data: {
+                labels: [';
+        foreach ($systems as $system=>$quantity) {
+            $codeHTML .= '"' . $system . '", ';
+        }
+        $codeHTML .='],
+                datasets: [{
+                    data: [';
+
+        foreach ($systems as $system=>$quantity)
+        {
+            $codeHTML .= $quantity . ',';
+        }
+
+        $codeHTML .= '],
+                    label: "' . $this->_currentChartOptions['label'] . '",
+                    backgroundColor: [';
+
+        if( count($systems) > count($this->_currentChartOptions['colors']) ) {
+            $this->_currentChartOptions['colors'] = array_merge($this->_currentChartOptions['colors'], $this->pickRandomColors(count($systems) - count($this->_currentChartOptions['colors'])));
+        }
+
+        $codeHTML .= $this->arrayColorToString($this->_currentChartOptions['colors']) . ', ';
+
+        $codeHTML .= ']
+                    },
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: "' . $this->_currentChartOptions['title'] . '"
+    }
+  }
+});
+    </script>';
+
+        return $codeHTML;
+    }
+
+
+
+
+
+
+
+
+
 
 
     /*
@@ -1651,12 +2002,6 @@ mymap.addLayer(markers);
     }
 
 
-
-    private function arrayColorToString($arrayColor=array())
-    {
-        return '"' . implode('","', $arrayColor) . '"';
-    }
-
     private function cleanString($string='')
     {
         $forbidden = array("'", "\"", ".", ",", "(", ")", '-');
@@ -1779,7 +2124,9 @@ mymap.addLayer(markers);
         $this->_currentChartOptions = array(
             'canvasId'=>$this->generateRandomString(20),
             'color'=>$this->pickRandomColors(1)[0],
+            'colors'=>array(),
             'divContainingCanvasId'=>$this->generateRandomString(20),
+            'divContainingCanvasClass'=>'',
             'fill'=>'true',
             'height'=>'400px',
             'label'=>'',
@@ -1796,8 +2143,14 @@ mymap.addLayer(markers);
                 case 'color':
                     $this->_currentChartOptions['color'] = $optionValue;
                     break;
+                case 'colors':
+                    $this->_currentChartOptions['colors'] = $optionValue;
+                    break;
                 case 'divContainingCanvasId':
                     $this->_currentChartOptions['divContainingCanvasId'] = $optionValue;
+                    break;
+                case 'divContainingCanvasClass':
+                    $this->_currentChartOptions['divContainingCanvasClass'] = $optionValue;
                     break;
                 case 'fill':
                     if($optionValue=='true' || $optionValue=='false') {
@@ -1892,6 +2245,13 @@ mymap.addLayer(markers);
     }
 
 
+    private function arrayColorToString($arrayColor=array())
+    {
+        return '"' . implode('","', $arrayColor) . '"';
+    }
+
+
+
     private function getHourRepartition(&$data)
     {
         $hoursData = array(
@@ -1931,6 +2291,97 @@ mymap.addLayer(markers);
         return $hoursData;
     }
 
+
+    private function getCountryRepartition(&$data=array())
+    {
+        $countries =array(
+            'Unknown'=>0,
+        );
+        foreach ($data['country'] as $country) {
+            if($country=='') {
+                $countries['Unknown']+=1;
+            } else if(!array_key_exists($country, $countries)) {
+                $countries[$country]=1;
+            } else {
+                $countries[$country]+=1;
+            }
+        }
+        return $countries;
+    }
+
+
+
+    private function getBotRepartition(&$data=array())
+    {
+        $bots = array(
+            'human'=>0,
+            'bot'=>0,
+        );
+        foreach ($data['bot'] as $isBot) {
+            if($isBot=='') {
+                $bots['bot']+=1;
+            } else if($isBot=='0') {
+                $bots['bot']+=1;
+            } else {
+                $bots['human']+=1;
+            }
+        }
+        return $bots;
+    }
+
+    private function getBrowserRepartition(&$data=array())
+    {
+        $browsers =array(
+            'Unknown'=>0,
+        );
+        foreach ($data['browser'] as $browser) {
+            if($browser=='') {
+                $browsers['Unknown']+=1;
+            } else if(!array_key_exists($browser, $browsers)) {
+                $browsers[$browser]=1;
+            } else {
+                $browsers[$browser]+=1;
+            }
+        }
+        return $browsers;
+    }
+
+
+    private function getMobileRepartition(&$data=array())
+    {
+        $mobiles = array(
+            'isMobile'=>0,
+            'isNotMobile'=>0,
+        );
+        foreach ($data['mobile'] as $isMobile) {
+            if($isMobile=='') {
+                $mobiles['isNotMobile']+=1;
+            } else if($isMobile=='1') {
+                $mobiles['isNotMobile']+=1;
+            } else {
+                $mobiles['isMobile']+=1;
+            }
+        }
+        return $mobiles;
+    }
+
+
+    private function getSystemRepartition(&$data=array())
+    {
+        $systems =array(
+            'Unknown'=>0,
+        );
+        foreach ($data['system'] as $system) {
+            if($system=='') {
+                $systems['Unknown']+=1;
+            } else if(!array_key_exists($system, $systems)) {
+                $systems[$system]=1;
+            } else {
+                $systems[$system]+=1;
+            }
+        }
+        return $systems;
+    }
 
 
 

@@ -20,10 +20,15 @@ error_reporting(E_ALL);
 
 
 require_once __DIR__ . '/src/results.php';
+// It is highly recommended to gather all your data in one shot. It's way quicker.
 $myResults = new Results(
     array(
-        'date',
         'hour',
+        'country',
+        'bot',
+        'browser',
+        'mobile',
+        'system',
     )
 );
 $myData = $myResults->getData();
@@ -56,6 +61,7 @@ echo '<!doctype html>
         ' . $myResults->getChart('linechart', 'hour', $myData, array(
         'canvasId'=>'myHoursLineChart',
         'divContainingCanvasId'=>'myHoursLineChartBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3', // You can apply the classes you want directly on the canvas container.
         'label'=>'Hourly affluence',
         'color'=>'#3e95cd',
         'fill'=>'true',
@@ -67,6 +73,7 @@ echo '<!doctype html>
     $myResults->getChart('barchart', 'hour', $myData, array(
         'canvasId'=>'myHoursBarChart',
         'divContainingCanvasId'=>'myHoursBarChartBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
         'label'=>'Hourly affluence',
         'color'=>'#3e95cd',
         'fill'=>'true',
@@ -74,6 +81,95 @@ echo '<!doctype html>
         'title'=>'Hours Linechart',
         'height'=>'500px',
         'width'=>'600px',
-    ) ) .'
+    ) ).
+    $myResults->getChart('piechart', 'country', $myData, array(
+        'canvasId'=>'myCountriesPieChart',
+        'divContainingCanvasId'=>'myCountriesPieChartBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
+        'label'=>'Origin of my visitors',
+        'colors'=>array('red', 'blue', 'yellow'),   // Please, note that only three colors are given here.
+                                                    // If more colors are needed, others will be automatically chosen
+        'fill'=>'true',
+        'title'=>'Origin of my visitors',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .
+    $myResults->getChart('doughnut', 'country', $myData, array(
+        'canvasId'=>'myCountriesDonutChart',
+        'divContainingCanvasId'=>'myCountriesDonutChartBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
+        'label'=>'Origin of my visitors',
+        'colors'=>array(),
+        'fill'=>'true',
+        'title'=>'Origin of my visitors',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .
+    $myResults->getChart('piechart', 'bot', $myData, array(
+        'canvasId'=>'myBotPieChart',
+        'divContainingCanvasId'=>'myBotPieChartBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
+        'label'=>'Proportion of bots',
+        'colors'=>array('blue', 'grey'),   // Please, note that the first color always represents the human proportion.
+        'fill'=>'true',
+        'title'=>'Origin of my visitors',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .
+    $myResults->getChart('doughnut', 'bot', $myData, array(
+        'canvasId'=>'myBotDonutChart',
+        'divContainingCanvasId'=>'myBotDonutBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
+        'label'=>'Proportion of bots',
+        'colors'=>array('blue', 'grey'),   // Please, note that the first color always represents the human proportion.
+        'fill'=>'true',
+        'title'=>'Origin of my visitors',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .
+    $myResults->getChart('piechart', 'browser', $myData, array(
+        'canvasId'=>'myBrowserPieChart',
+        'divContainingCanvasId'=>'myBrowserPieChartBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
+        'label'=>'Browsers',
+        'colors'=>array('blue', 'grey'),   // Please, note that the first color always represents the human proportion.
+        'fill'=>'true',
+        'title'=>'Which browsers are used ?',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .
+    $myResults->getChart('doughnut', 'browser', $myData, array(
+        'canvasId'=>'myBrowserDonutChart',
+        'divContainingCanvasId'=>'myBrowserDonutBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
+        'label'=>'Browsers',
+        'colors'=>array('blue', 'grey'),   // Please, note that the first color always represents the human proportion.
+        'fill'=>'true',
+        'title'=>'Which browsers are used ?',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .
+    $myResults->getChart('piechart', 'system', $myData, array(
+        'canvasId'=>'mySystemPieChart',
+        'divContainingCanvasId'=>'mySystemPieChartBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
+        'label'=>'Operanding systems',
+        'colors'=>array('blue', 'grey'),   // Please, note that the first color always represents the mobile proportion.
+        'fill'=>'true',
+        'title'=>'Which systems are used ?',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .
+    $myResults->getChart('doughnut', 'system', $myData, array(
+        'canvasId'=>'mySystemDonutChart',
+        'divContainingCanvasId'=>'mySystemDonutBlock',
+        'divContainingCanvasClass'=>'class1 class2 class3',
+        'label'=>'Operanding systems',
+        'colors'=>array('blue', 'grey'),   // Please, note that the first color always represents the mobile proportion.
+        'fill'=>'true',
+        'title'=>'Which systems are used ?',
+        'height'=>'500px',
+        'width'=>'600px',
+    ) ) .'        
     </body>
 </html>';
