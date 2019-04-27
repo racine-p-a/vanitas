@@ -313,7 +313,11 @@ class Visitor
     }
     public function setRobot($robot=false)
     {
-        $this->_isBot = $robot;
+        if($robot=='') {
+            $this->_isBot = false;
+        } else {
+            $this->_isBot = $robot;
+        }
     }
     public function setOS($osFamily='')
     {

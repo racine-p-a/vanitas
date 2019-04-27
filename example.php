@@ -23,16 +23,13 @@ require_once __DIR__ . '/src/results.php';
 // It is highly recommended to gather all your data in one shot. It's way quicker.
 $myResults = new Results(
     array(
-        'hour',
-        'country',
-        'bot',
-        'browser',
-        'mobile',
-        'system',
-        'navigation',
-        // todo add colored map of countries
-        // todo add count of all users (count() ).
-        // todo piechart 3D ?
+        array('hour', true),
+        array('country', true),
+        array('bot', true),
+        array('browser', false),
+        array('mobile', false),
+        array('system', true),
+        array('navigation', false),
     )
 );
 
@@ -64,7 +61,8 @@ echo '<!doctype html>
         
         <!-- Import the following script and css to get the node chart. -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
-         <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
+          
     </head>
     
     <body>
