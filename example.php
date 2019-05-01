@@ -13,11 +13,18 @@
  *
  */
 
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+
+
+$IPsToIgnore = array(
+    '46.246.65.213',
+    '167.99.73.221',
+    '173.230.144.98',
+    '206.189.45.129',
+);
 
 require_once __DIR__ . '/src/results.php';
 // It is highly recommended to gather all your data in one shot. It's way quicker.
@@ -30,8 +37,10 @@ $myResults = new Results(
         array('mobile', false),
         array('system', true),
         array('navigation', false),
-    )
+    ),
+    $IPsToIgnore
 );
+
 
 $myData = $myResults->getData();
 /*
@@ -62,7 +71,7 @@ echo '<!doctype html>
         <!-- Import the following script and css to get the node chart. -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
         <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet">
-          
+        
     </head>
     
     <body>
@@ -84,9 +93,7 @@ echo '<!doctype html>
         'divContainingCanvasClass'=>'class1 class2 class3',
         'label'=>'Hourly affluence',
         'color'=>'#3e95cd',
-        'fill'=>'true',
-        'steppedLine'=>'false', // Gives your line chart an aspect of barchart. Choose among : false, true, before, after, middle.
-        'title'=>'Hours Linechart',
+        'title'=>'Hours Barchart',
         'height'=>'500px',
         'width'=>'600px',
     ) ).
@@ -106,9 +113,7 @@ echo '<!doctype html>
         'canvasId'=>'myCountriesDonutChart',
         'divContainingCanvasId'=>'myCountriesDonutChartBlock',
         'divContainingCanvasClass'=>'class1 class2 class3',
-        'label'=>'Origin of my visitors',
         'colors'=>array(),
-        'fill'=>'true',
         'title'=>'Origin of my visitors',
         'height'=>'500px',
         'width'=>'600px',
@@ -204,12 +209,8 @@ echo '<!doctype html>
     $myResults->getChart('nodes', 'navigation', $myData, array(
         'divContainingCanvasId'=>'myNavigationGraphBlock',
         'divContainingCanvasClass'=>'class1 class2 class3',
-        'label'=>'Operanding systems',
-        'colors'=>array('blue', 'grey'),   // Please, note that the first color always represents the mobile proportion.
-        'fill'=>'true',
-        'title'=>'Which systems are used ?',
-        'height'=>'500px',
-        'width'=>'600px',
-    ) ) .'        
+        'height'=>'300px',
+        'width'=>'800px',
+    ) ) .'
     </body>
 </html>';

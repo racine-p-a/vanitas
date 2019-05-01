@@ -42,9 +42,10 @@ class Results
     /**
      * Results constructor.
      * @param array $dataNames
+     * @param array $IPstoIgnore
      * @throws Exception
      */
-    public function __construct(array $dataNames=array())
+    public function __construct(array $dataNames=array(), array &$IPstoIgnore=array())
     {
         $botChosen = array();
         foreach ($dataNames as $dataName) {
@@ -76,53 +77,56 @@ class Results
                 $csvLine = str_getcsv($line);
 
                 foreach ($this->_data as $idArray=>$valueArray) {
-                    switch ($idArray) {
-                        case 'bot':
-                            if($botChosen['bot'] || $csvLine[11]=='0') {
-                                array_push($this->_data['bot'], $csvLine[11]);
-                            }
-                            break;
-                        case 'browser':
-                            if($botChosen['browser'] || $csvLine[11]=='0') {
-                                array_push($this->_data['browser'], $csvLine[12]);
-                            }
-                            break;
-                        case 'country':
-                            if($botChosen['country'] || $csvLine[11]=='0') {
-                                array_push($this->_data['country'], $csvLine[7]);
-                            }
-                            break;
-                        case 'hour':
-                            if($botChosen['hour'] || $csvLine[11]=='0') {
-                                array_push($this->_data['hour'], $csvLine[1]);
-                            }
-                            break;
-                        case 'mobile':
-                            if($botChosen['mobile'] || $csvLine[11]=='0') {
-                                array_push($this->_data['mobile'], $csvLine[16]);
-                            }
-                            break;
-                        case 'navigation':
-                            if($botChosen['navigation'] || $csvLine[11]=='0') {
-                                $prefixes = array('http://', 'https://', 'http://www.', 'https://www.', 'www.');
-                                $comingFrom = str_replace($prefixes, '', trim($csvLine[6]));
-                                while(mb_substr($comingFrom, -1)=='/') {
-                                    $comingFrom = rtrim($comingFrom, '/');
+                    if( !in_array($csvLine[2], $IPstoIgnore) ) {
+                        switch ($idArray) {
+                            case 'bot':
+                                if($botChosen['bot'] || $csvLine[11]=='0') {
+                                    array_push($this->_data['bot'], $csvLine[11]);
                                 }
-                                $currentURL = str_replace($prefixes, '', trim($csvLine[5]));
-                                while(mb_substr($currentURL, -1)=='/') {
-                                    $currentURL = rtrim($currentURL, '/');
+                                break;
+                            case 'browser':
+                                if($botChosen['browser'] || $csvLine[11]=='0') {
+                                    array_push($this->_data['browser'], $csvLine[12]);
                                 }
-                                array_push($this->_data['navigation'], array($comingFrom, $currentURL));
-                            }
-                            break;
-                        case 'system':
-                            if($botChosen['system'] || $csvLine[11]=='0') {
-                                array_push($this->_data['system'], $csvLine[17]);
-                            }
-                            break;
-                        default:
-                            break;
+                                break;
+                            case 'country':
+                                // todo what about multilingue country names ?
+                                if($botChosen['country'] || $csvLine[11]=='0') {
+                                    array_push($this->_data['country'], $csvLine[7]);
+                                }
+                                break;
+                            case 'hour':
+                                if($botChosen['hour'] || $csvLine[11]=='0') {
+                                    array_push($this->_data['hour'], $csvLine[1]);
+                                }
+                                break;
+                            case 'mobile':
+                                if($botChosen['mobile'] || $csvLine[11]=='0') {
+                                    array_push($this->_data['mobile'], $csvLine[16]);
+                                }
+                                break;
+                            case 'navigation':
+                                if($botChosen['navigation'] || $csvLine[11]=='0') {
+                                    $prefixes = array('http://', 'https://', 'http://www.', 'https://www.', 'www.');
+                                    $comingFrom = str_replace($prefixes, '', trim($csvLine[6]));
+                                    while(mb_substr($comingFrom, -1)=='/') {
+                                        $comingFrom = rtrim($comingFrom, '/');
+                                    }
+                                    $currentURL = str_replace($prefixes, '', trim($csvLine[5]));
+                                    while(mb_substr($currentURL, -1)=='/') {
+                                        $currentURL = rtrim($currentURL, '/');
+                                    }
+                                    array_push($this->_data['navigation'], array(htmlspecialchars($comingFrom, ENT_QUOTES), htmlspecialchars($currentURL, ENT_QUOTES)));
+                                }
+                                break;
+                            case 'system':
+                                if($botChosen['system'] || $csvLine[11]=='0') {
+                                    array_push($this->_data['system'], $csvLine[17]);
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
             }
@@ -586,8 +590,6 @@ class Results
             }
         }
         $codeHTML = '
-        <div id="' . $this->_currentChartOptions['divContainingCanvasId'] . '"></div>
-        
         <script type="text/javascript">
             // create an array with nodes
           var nodes = new vis.DataSet([';
@@ -975,7 +977,7 @@ class Results
     /**
      * @return array
      */
-    public function getData(): array
+    public function getData()
     {
         return $this->_data;
     }
