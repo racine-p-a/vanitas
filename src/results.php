@@ -17,6 +17,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// integrate more customization on charts and graphs
+
 
 class Results
 {
@@ -77,7 +79,7 @@ class Results
                 $csvLine = str_getcsv($line);
 
                 foreach ($this->_data as $idArray=>$valueArray) {
-                    if( !in_array($csvLine[2], $IPstoIgnore) ) {
+                    if(count($csvLine )>2 && !in_array($csvLine[2], $IPstoIgnore) ) {
                         switch ($idArray) {
                             case 'bot':
                                 if($botChosen['bot'] || $csvLine[11]=='0') {
